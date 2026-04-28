@@ -28,8 +28,7 @@ class KillSwitch:
 
     def activate(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text("activated
-", encoding="utf-8")
+        self.path.write_text("activated\n", encoding="utf-8")
 
     def deactivate(self) -> None:
         if self.path.exists():
