@@ -1,0 +1,17 @@
+# Core: no external dependencies needed (stdlib only)
+# Install with: pip install -e .
+
+# Development dependencies
+ruff>=0.4.0
+pytest>=7.0.0
+pytest-cov>=4.0.0
+mypy>=1.5.0
+
+# Optional - LLM providers (uncomment as needed)
+# openai>=1.0.0
+# anthropic>=0.20.0
+# google-generativeai>=0.4.0
+
+# Optional - Server mode
+# fastapi>=0.100.0
+# uvicorn[standard]>=0.22.0
