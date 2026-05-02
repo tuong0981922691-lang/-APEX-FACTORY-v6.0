@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+
+# Storage (runtime data)
+storage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Evidence (large files)
+evidence/*.mp4
+evidence/*.webm
+evidence/*.mov
+
+# Keep .env.example
+!.env.example

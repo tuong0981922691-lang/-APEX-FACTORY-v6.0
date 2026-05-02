@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BotThongMinh — Shop ứng dụng AI</title>
+  <style>
+    :root {
+      --bg: #080b14;
+      --line: #25314a;
+      --text: #e5e7eb;
+      --muted: #9aa4b2;
+      --accent: #5b6dff;
+      --font-vi: "Segoe UI", "Roboto", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: radial-gradient(circle at top, #1d2a49 0%, #0b1020 25%, var(--bg) 100%);
+      color: var(--text);
+      font-family: var(--font-vi);
+      min-height: 100vh;
+    }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.5rem 2rem; border-bottom: 1px solid var(--line);
+    }
+    header h1 { font-size: 1.5rem; color: var(--accent); }
+    nav a { color: var(--muted); text-decoration: none; margin-left: 1.5rem; transition: color .2s; }
+    nav a:hover { color: var(--accent); }
+    main { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+    .hero { text-align: center; margin-bottom: 3rem; }
+    .hero h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .hero p { color: var(--muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    .card {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--line);
+      border-radius: 12px; padding: 1.5rem; transition: border-color .2s, transform .2s;
+      text-decoration: none; color: var(--text);
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+    .card p { color: var(--muted); font-size: 0.9rem; }
+    .card .badge {
+      display: inline-block; background: var(--accent); color: #fff;
+      font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; margin-top: 0.75rem;
+    }
+    footer {
+      text-align: center; padding: 2rem; color: var(--muted);
+      border-top: 1px solid var(--line); font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BotThongMinh</h1>
+    <nav>
+      <a href="/site/portal.html">Shop</a>
+      <a href="/site/command-room/">Phòng Chỉ huy</a>
+      <a href="/site/orders/new.html">Đặt hàng</a>
+      <a href="/audit-log">Audit</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2>Shop ứng dụng AI</h2>
+      <p>Giải pháp AI chuyên nghiệp — website builder, mobile app builder, thuật toán AI sẵn sàng sử dụng</p>
+    </section>
+
+    <div class="cards">
+      <a class="card" href="/site/orders/new.html?type=website">
+        <h3>Website Builder</h3>
+        <p>Tạo website chuyên nghiệp với AI — từ landing page đến e-commerce</p>
+        <span class="badge">Beta</span>
+      </a>
+      <a class="card" href="/site/orders/new.html?type=mobile">
+        <h3>Mobile App Builder</h3>
+        <p>Xây dựng ứng dụng di động iOS & Android nhanh chóng</p>
+        <span class="badge">Beta</span>
+      </a>
+      <a class="card" href="/site/orders/new.html?type=algorithm">
+        <h3>Algorithm Store</h3>
+        <p>Thuật toán AI sẵn sàng sử dụng — từ NLP đến Computer Vision</p>
+        <span class="badge">Beta</span>
+      </a>
+      <a class="card" href="/site/command-room/">
+        <h3>Phòng Chỉ huy</h3>
+        <p>Dashboard quản lý nội bộ (Owner only)</p>
+        <span class="badge">Auth Required</span>
+      </a>
+      <a class="card" href="/site/orders/">
+        <h3>Theo dõi đơn hàng</h3>
+        <p>Kiểm tra trạng thái đơn hàng của bạn</p>
+        <span class="badge">Live</span>
+      </a>
+      <a class="card" href="/audit-log">
+        <h3>Audit Log</h3>
+        <p>Construction log minh bạch với HMAC chain</p>
+        <span class="badge">Public</span>
+      </a>
+      <a class="card" href="#">
+        <h3>Wisdom Library</h3>
+        <p>Sách Tinh Hoa — nghiên cứu về AI & automation</p>
+        <span class="badge">Coming Soon</span>
+      </a>
+      <a class="card" href="#">
+        <h3>Pilot Test</h3>
+        <p>Phòng thử nghiệm công cụ AI</p>
+        <span class="badge">Coming v2</span>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    Apex Factory v6.x &copy; 2026
+  </footer>
+</body>
+</html>

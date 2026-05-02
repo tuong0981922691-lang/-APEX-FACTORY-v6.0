@@ -1,0 +1,73 @@
+/* BotThongMinh — shared theme tokens (extracted from portal.html) */
+:root {
+  --bg: #080b14;
+  --line: #25314a;
+  --text: #e5e7eb;
+  --muted: #9aa4b2;
+  --accent: #5b6dff;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --font-vi: "Segoe UI", "Roboto", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: radial-gradient(circle at top, #1d2a49 0%, #0b1020 25%, var(--bg) 100%);
+  color: var(--text);
+  font-family: var(--font-vi);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 2rem; border-bottom: 1px solid var(--line);
+}
+header h1 { font-size: 1.3rem; color: var(--accent); }
+header nav a { color: var(--muted); margin-left: 1.5rem; }
+header nav a:hover { color: var(--accent); text-decoration: none; }
+
+.btn {
+  display: inline-block; padding: 0.6rem 1.2rem;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+  transition: opacity .2s;
+}
+.btn:hover { opacity: 0.85; text-decoration: none; }
+.btn--danger { background: var(--danger); }
+.btn--success { background: var(--success); }
+
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: 0.3rem; color: var(--muted); font-size: 0.85rem; }
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%; padding: 0.6rem; background: rgba(255,255,255,0.05);
+  border: 1px solid var(--line); border-radius: 6px; color: var(--text);
+  font-family: var(--font-vi);
+}
+.form-group input:focus, .form-group textarea:focus {
+  outline: none; border-color: var(--accent);
+}
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-size: 0.85rem; font-weight: 500; }
+
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 0.75rem; font-weight: 500;
+}
+.badge--pending { background: var(--warning); color: #000; }
+.badge--approved { background: var(--success); color: #fff; }
+.badge--rejected { background: var(--danger); color: #fff; }
+
+footer {
+  text-align: center; padding: 2rem; color: var(--muted);
+  border-top: 1px solid var(--line); font-size: 0.85rem; margin-top: 3rem;
+}
