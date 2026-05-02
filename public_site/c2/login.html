@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login — Phòng Chỉ huy</title>
+  <link rel="stylesheet" href="/site/shared/style.css">
+  <script src="/site/shared/api.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Phòng Chỉ huy</h1>
+    <nav><a href="/site/portal.html">Trang chủ</a></nav>
+  </header>
+
+  <div class="container" style="max-width: 450px; margin-top: 5rem;">
+    <!-- Step 1: Magic Word -->
+    <div id="step1">
+      <h2>Bước 1 — Magic Word</h2>
+      <div class="form-group">
+        <label for="magic">Nhập Magic Word</label>
+        <input type="password" id="magic" placeholder="..." />
+      </div>
+      <button class="btn" onclick="submitStep1()">Tiếp</button>
+      <p id="step1-error" style="color: var(--danger); margin-top: 1rem; display: none;"></p>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div id="step2" style="display: none;">
+      <h2>Bước 2 — OTP</h2>
+      <p style="color: var(--muted); margin-bottom: 1rem;">Mã OTP đã gửi qua Telegram</p>
+      <div class="form-group">
+        <label for="otp">Nhập mã OTP (6 số)</label>
+        <input type="text" id="otp" maxlength="6" placeholder="000000" />
+      </div>
+      <button class="btn" onclick="submitStep2()">Xác nhận</button>
+      <p id="step2-error" style="color: var(--danger); margin-top: 1rem; display: none;"></p>
+    </div>
+
+    <!-- Step 3: Success -->
+    <div id="step3" style="display: none;">
+      <h2 style="color: var(--success);">Đăng nhập thành công</h2>
+      <p>Đang chuyển tới Dashboard...</p>
+    </div>
+
+    <!-- Recovery link -->
+    <p style="margin-top: 2rem; text-align: center;">
+      <a href="/site/command-room/recovery.html" style="color: var(--muted); font-size: 0.85rem;">
+        Quên Magic Word?
+      </a>
+    </p>
+  </div>
+
+  <footer>Apex Factory v6.x &copy; 2026</footer>
+
+  <script>
+    let sessionToken = '';
+
+    async function submitStep1() {
+      const magic = document.getElementById('magic').value;
+      const errEl = document.getElementById('step1-error');
+      try {
+        const data = await apex.post('/api/c2/login/step1', { magic_word: magic });
+        if (data.ok) {
+          sessionToken = data.session_token || '';
+          document.getElementById('step1').style.display = 'none';
+          document.getElementById('step2').style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
+      }
+    }
+
+    async function submitStep2() {
+      const otp = document.getElementById('otp').value;
+      const errEl = document.getElementById('step2-error');
+      try {
+        const data = await apex.post('/api/c2/login/step2', { otp_code: otp, session_token: sessionToken });
+        if (data.ok) {
+          document.getElementById('step2').style.display = 'none';
+          document.getElementById('step3').style.display = 'block';
+          setTimeout(() => { window.location.href = '/site/command-room/'; }, 1500);
+        }
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

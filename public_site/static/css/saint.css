@@ -1,0 +1,44 @@
+/* Saint CSS — Khách là Thánh (NT23)
+   Rules: font >= 18px, high contrast, no ads, no popups, no tracking */
+
+body {
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+main, .container {
+  font-size: 18px;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.3rem; }
+
+input, textarea, select, button {
+  font-size: 18px;
+}
+
+/* High contrast text */
+p, span, li {
+  color: var(--text);
+}
+
+/* Confirmation messages get extra visibility */
+.confirm-msg {
+  font-weight: 600;
+  color: var(--accent);
+  padding: 0.5rem 0;
+}
+
+/* Skip button — always visible */
+.skip-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 0.8rem 1.5rem;
+  background: var(--muted);
+  color: var(--bg);
+  border-radius: 8px;
+  font-weight: 600;
+  z-index: 100;
+}
