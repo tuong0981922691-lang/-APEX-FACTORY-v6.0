@@ -1,11 +1,22 @@
+# Python
 venv/
 .venv/
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Env & local secrets
 .env
 .env.*
+
+# Runtime / builds (adjust per new project)
 node_modules/
 dist/
-*.log
+build/
 apex_factory_storage/
+storage/
+data/
 reports/
+*.log

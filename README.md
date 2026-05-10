@@ -1,21 +1,13 @@
-# -APEX-FACTORY-v6.0
-# ⚖️ THIẾT QUÂN LUẬT VẬN HÀNH APEX FACTORY v6.0 **TRẠNG THÁI:** TỐI MẬT - BẮT BUỘC TUÂN THỦ 100%
+# Workspace cleared
 
-## Auto setup
+This repository working tree was wiped on purpose to start a **new project** with a clean checkout.
 
-Run the repository bootstrap on Linux/macOS:
+- No virtual environment, no build artifacts, no runtime storage paths are present in this tree.
+- Clone or add your new source here, then create a branch and begin work as usual.
 
-```bash
-bash scripts/auto_setup.sh
-```
-
-The script creates a local virtual environment, installs `requirements.txt`, and
-runs a project status check. If the implementation source tree (`apex_core`,
-`tests`, `scripts` beyond setup helpers) is missing, the status check reports it
-clearly so the full source package can be synced before continuing sprint work.
-
-To inspect status without installing dependencies:
+To remove Python caches and local venv later (on your machine):
 
 ```bash
-python3 scripts/project_status.py
+rm -rf .venv venv __pycache__ .pytest_cache .ruff_cache
+find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 ```
