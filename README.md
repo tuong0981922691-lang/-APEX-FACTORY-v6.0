@@ -1,13 +1,16 @@
-# Workspace cleared
+# botthongminh.com — APEX core (FastAPI)
 
-This repository working tree was wiped on purpose to start a **new project** with a clean checkout.
+**APEX FACTORY v6.0** — operational rules: see constitution / blueprint in project docs as needed.
 
-- No virtual environment, no build artifacts, no runtime storage paths are present in this tree.
-- Clone or add your new source here, then create a branch and begin work as usual.
+This repository contains the **botthongminh.com** backend (`apex_core/`), static site (`public_site/`), and tests. For Cursor agents and day-to-day commands, start with:
 
-To remove Python caches and local venv later (on your machine):
+**[AGENTS.md](AGENTS.md)**
+
+Quick start:
 
 ```bash
-rm -rf .venv venv __pycache__ .pytest_cache .ruff_cache
-find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+cp .env.example .env   # then edit secrets
+python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python -m apex_core.orchestrator_v6.studio_entry --serve --host 0.0.0.0 --port 8787
 ```

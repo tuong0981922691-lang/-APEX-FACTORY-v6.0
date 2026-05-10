@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đơn hàng — BotThongMinh</title>
+  <link rel="stylesheet" href="/site/shared/style.css">
+  <script src="/site/shared/api.js"></script>
+</head>
+<body>
+  <header>
+    <h1>BotThongMinh</h1>
+    <nav>
+      <a href="/site/portal.html">Shop</a>
+      <a href="/site/orders/new.html">Đặt hàng mới</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2 style="margin-bottom: 1.5rem;">Danh sách đơn hàng</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Loại</th>
+          <th>Trạng thái</th>
+          <th>Ngày tạo</th>
+        </tr>
+      </thead>
+      <tbody id="orders-body">
+        <tr><td colspan="4" style="color: var(--muted);">Đang tải...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>Apex Factory v6.x &copy; 2026</footer>
+
+  <script>
+    (async () => {
+      try {
+        const data = await apex.get('/api/orders/list');
+        const tbody = document.getElementById('orders-body');
+        if (data.orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" style="color: var(--muted);">Chưa có đơn hàng nào.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data.orders.map(o => `
+          <tr>
+            <td>#${o.id}</td>
+            <td>${o.product_type}</td>
+            <td><span class="badge badge--${o.status === 'approved' ? 'approved' : o.status === 'pending_approval' ? 'pending' : 'rejected'}">${o.status}</span></td>
+            <td>${o.created_at || ''}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        document.getElementById('orders-body').innerHTML = `<tr><td colspan="4" style="color: var(--danger);">${err.message}</td></tr>`;
+      }
+    })();
+  </script>
+</body>
+</html>

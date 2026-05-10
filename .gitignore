@@ -1,22 +1,44 @@
 # Python
-venv/
-.venv/
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+venv/
+.venv/
+*.egg-info/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
 
-# Env & local secrets
+# Environment
 .env
 .env.*
+!.env.example
+.env.local
 
-# Runtime / builds (adjust per new project)
+# Builds / JS
 node_modules/
 dist/
 build/
+
+# Runtime / storage (project-specific)
 apex_factory_storage/
 storage/
 data/
 reports/
 *.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Evidence (large files)
+evidence/*.mp4
+evidence/*.webm
+evidence/*.mov

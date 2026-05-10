@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phòng Chỉ huy — BotThongMinh</title>
+  <link rel="stylesheet" href="/site/shared/style.css">
+  <script src="/site/shared/api.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Phòng Chỉ huy</h1>
+    <nav>
+      <a href="/site/portal.html">Shop</a>
+      <a href="/site/command-room/">Dashboard</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2 style="margin-bottom: 2rem;">Welcome, Owner</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+      <a href="/site/command-room/ingest.html" class="module-card">
+        <h3>M1 — Ingest Link</h3>
+        <p>Nhập URL kho tàng</p>
+      </a>
+      <a href="/site/command-room/mining-queue.html" class="module-card">
+        <h3>M2 — Mining Queue</h3>
+        <p>Danh sách AI khai thác</p>
+      </a>
+      <a href="/site/command-room/probe-panel.html" class="module-card">
+        <h3>M3 — Probe Panel</h3>
+        <p>Ngao + Deflection probes</p>
+      </a>
+      <a href="/site/command-room/audit-stream.html" class="module-card">
+        <h3>M4 — Audit Stream</h3>
+        <p>Real-time audit log</p>
+      </a>
+      <a href="/site/command-room/orders.html" class="module-card">
+        <h3>M5 — Orders</h3>
+        <p>Đơn hàng chờ duyệt</p>
+      </a>
+      <a href="/site/command-room/wallets.html" class="module-card">
+        <h3>M6 — Wallets</h3>
+        <p>MoMo / Bank toggle</p>
+      </a>
+      <a href="/site/command-room/notifications.html" class="module-card">
+        <h3>M7 — Notifications</h3>
+        <p>Gmail + Telegram destinations</p>
+      </a>
+      <a href="/site/command-room/security.html" class="module-card">
+        <h3>M8 — Security</h3>
+        <p>2FA + Recovery OTP</p>
+      </a>
+    </div>
+  </div>
+
+  <footer>Apex Factory v6.x &copy; 2026</footer>
+
+  <style>
+    .module-card {
+      display: block; padding: 1.5rem; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line); border-radius: 10px;
+      text-decoration: none; color: var(--text); transition: border-color .2s;
+    }
+    .module-card:hover { border-color: var(--accent); }
+    .module-card h3 { color: var(--accent); margin-bottom: 0.3rem; font-size: 1rem; }
+    .module-card p { color: var(--muted); font-size: 0.85rem; }
+  </style>
+</body>
+</html>

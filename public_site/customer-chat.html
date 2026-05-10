@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đặt ý tưởng — BotThongMinh</title>
+  <link rel="stylesheet" href="/site/shared/style.css">
+  <link rel="stylesheet" href="/site/static/css/saint.css">
+  <script src="/site/shared/api.js"></script>
+</head>
+<body>
+  <header>
+    <h1>BotThongMinh</h1>
+    <nav>
+      <a href="/site/portal.html">Trang chủ</a>
+      <a href="/site/orders/">Đơn hàng</a>
+    </nav>
+  </header>
+
+  <div class="container" style="max-width: 700px;">
+    <h2>Đặt ý tưởng ứng dụng</h2>
+    <p style="color: var(--muted); margin-bottom: 2rem;">
+      Mô tả ý tưởng của bạn — chúng tôi sẽ hỏi chi tiết để hiểu đúng nhu cầu.
+    </p>
+
+    <div id="chat-messages" style="min-height: 200px; margin-bottom: 1.5rem;"></div>
+
+    <div class="form-group">
+      <textarea id="user-input" rows="3" placeholder="Mô tả ý tưởng ứng dụng của bạn..."></textarea>
+    </div>
+    <div style="display: flex; gap: 1rem;">
+      <button class="btn" onclick="sendMessage()">Gửi</button>
+      <button class="btn" style="background: var(--muted);" onclick="skipToFinish()">Chốt rồi đừng hỏi nữa</button>
+    </div>
+  </div>
+
+  <footer>Apex Factory v6.x &copy; 2026</footer>
+
+  <script>
+    const messages = document.getElementById('chat-messages');
+    let conversationHistory = [];
+
+    function addMessage(role, text) {
+      const div = document.createElement('div');
+      div.style.cssText = `margin-bottom: 1rem; padding: 1rem; border-radius: 8px; border: 1px solid var(--line); background: ${role === 'customer' ? 'rgba(91,109,255,0.05)' : 'rgba(255,255,255,0.02)'}`;
+      div.innerHTML = `<strong style="color: ${role === 'customer' ? 'var(--accent)' : 'var(--success)'};">${role === 'customer' ? 'Bạn' : 'BotThongMinh'}:</strong> <span>${text}</span>`;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      addMessage('customer', text);
+      conversationHistory.push({ role: 'customer', content: text });
+
+      try {
+        const data = await apex.post('/api/orders/cdp', {
+          product_type: 'website',
+          message: text,
+          conversation_history: conversationHistory
+        });
+        addMessage('assistant', data.response);
+        conversationHistory.push({ role: 'assistant', content: data.response });
+      } catch (err) {
+        addMessage('assistant', 'Lỗi: ' + err.message);
+      }
+    }
+
+    function skipToFinish() {
+      window.location.href = '/site/orders/new.html';
+    }
+  </script>
+</body>
+</html>
