@@ -6,15 +6,27 @@ __pycache__/
 venv/
 .venv/
 *.egg-info/
-dist/
-build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 
 # Environment
 .env
+.env.*
+!.env.example
 .env.local
 
-# Storage (runtime data)
+# Builds / JS
+node_modules/
+dist/
+build/
+
+# Runtime / storage (project-specific)
+apex_factory_storage/
 storage/
+data/
+reports/
+*.log
 
 # IDE
 .vscode/
@@ -30,6 +42,3 @@ Thumbs.db
 evidence/*.mp4
 evidence/*.webm
 evidence/*.mov
-
-# Keep .env.example
-!.env.example
