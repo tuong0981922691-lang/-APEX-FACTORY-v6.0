@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Không gian Xổ số Miền Trung - 100 bản</title>
+  <style>
+    :root{
+      --bg:#241817;
+      --panel:#352321;
+      --panel-2:#432d29;
+      --panel-3:#5a3c35;
+      --line:#7a554a;
+      --text:#fff5e9;
+      --muted:#d8c3b2;
+      --gold:#ffd36a;
+      --red:#ff4d4d;
+      --green:#87f0b0;
+      --shadow:0 20px 45px rgba(0,0,0,.36);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:radial-gradient(circle at top,#43271f 0,#241817 45%,#160f0e 100%);color:var(--text);font-family:Arial,Helvetica,sans-serif;}
+    body{padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(22px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));}
+    .app{max-width:1180px;margin:0 auto;}
+    .topbar{position:sticky;top:calc(8px + env(safe-area-inset-top));z-index:20;display:flex;gap:10px;align-items:center;justify-content:space-between;background:rgba(36,24,23,.86);backdrop-filter:blur(14px);border:1px solid rgba(255,211,106,.18);border-radius:22px;padding:10px 12px;box-shadow:var(--shadow)}
+    .back{border:1px solid rgba(255,211,106,.35);background:linear-gradient(180deg,#6b4539,#432d29);color:var(--gold);font-weight:800;border-radius:14px;padding:10px 14px;cursor:pointer;white-space:nowrap}
+    .brand{display:flex;flex-direction:column;line-height:1.18;min-width:0;text-align:center;flex:1}
+    .brand b{font-size:18px;color:var(--gold);letter-spacing:.2px}.brand span{font-size:12px;color:var(--muted)}
+    .status{font-size:12px;color:var(--green);border:1px solid rgba(135,240,176,.25);padding:8px 10px;border-radius:999px;background:rgba(135,240,176,.08);white-space:nowrap}
+    .hero{margin:18px 0;background:linear-gradient(135deg,rgba(90,60,53,.92),rgba(53,35,33,.94));border:1px solid rgba(255,211,106,.2);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;overflow:hidden;position:relative}
+    .hero:before{content:"";position:absolute;inset:-120px -120px auto auto;width:260px;height:260px;background:radial-gradient(circle,rgba(255,211,106,.18),transparent 68%);pointer-events:none}.hero h1{margin:0 0 8px;color:var(--gold);font-size:28px}.hero p{margin:6px 0;color:var(--muted);line-height:1.55}.note{border-left:4px solid var(--gold);padding:10px 12px;background:rgba(255,211,106,.08);border-radius:12px;margin-top:12px;color:#ffe6a3}
+    .controls{display:grid;grid-template-columns:1fr 160px 160px;gap:10px;margin:16px 0}.controls input,.controls select{width:100%;background:#201514;color:var(--text);border:1px solid rgba(255,211,106,.22);border-radius:14px;padding:12px 13px;font-size:14px;outline:none}.controls input:focus,.controls select:focus{border-color:var(--gold)}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{border:1px solid rgba(255,211,106,.25);background:#2f201e;color:var(--muted);border-radius:999px;padding:9px 12px;cursor:pointer;font-weight:700}.tab.active{background:var(--gold);color:#2b1b17;border-color:var(--gold)}
+    .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}.metric{background:rgba(53,35,33,.88);border:1px solid rgba(255,211,106,.15);border-radius:16px;padding:13px}.metric small{display:block;color:var(--muted);font-size:12px}.metric b{font-size:22px;color:var(--gold)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.board{background:rgba(53,35,33,.94);border:1px solid rgba(255,211,106,.16);border-radius:var(--radius);box-shadow:0 14px 30px rgba(0,0,0,.25);overflow:hidden}.board-head{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;padding:14px;background:linear-gradient(180deg,#55382f,#3e2a26);border-bottom:1px solid rgba(255,211,106,.18)}.board-title{min-width:0}.board-title h2{margin:0;font-size:17px;color:var(--gold)}.board-title p{margin:4px 0 0;color:var(--muted);font-size:12px}.badge{font-size:12px;color:#2b1b17;background:var(--gold);font-weight:900;border-radius:999px;padding:6px 9px;white-space:nowrap}
+    table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border-bottom:1px solid rgba(255,255,255,.09);padding:9px 8px;text-align:center;vertical-align:middle}th{background:#2b1d1b;color:#ffe4aa;font-size:13px}.prize{width:82px;color:#ffd8bf;font-weight:800;background:rgba(255,255,255,.03)}.num{display:inline-block;margin:2px;padding:4px 7px;border-radius:9px;background:#241817;border:1px solid rgba(255,255,255,.08);font-weight:800;letter-spacing:.3px}.db .num{color:#fff;background:linear-gradient(180deg,#d92f2f,#951818);border-color:#ff7777;font-size:17px}.province{font-size:13px;color:#fff4df}.lotto{padding:12px 14px;background:#2b1d1b}.lotto h3{margin:0 0 8px;font-size:14px;color:var(--gold)}.duoi{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}.duoi span{background:#1e1413;border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:7px 3px;text-align:center;font-size:12px;color:#ffd8bf}.hidden{display:none!important}.footer{margin:18px 0 0;color:var(--muted);font-size:12px;text-align:center;line-height:1.5}.warn{color:#ffcc8a}.empty{padding:22px;text-align:center;color:var(--muted);background:rgba(53,35,33,.7);border:1px dashed rgba(255,211,106,.25);border-radius:18px}
+    @media(max-width:860px){.controls{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.status{display:none}.hero h1{font-size:23px}.topbar{align-items:center}.brand b{font-size:15px}}
+    @media(max-width:520px){body{padding-left:10px;padding-right:10px}.summary{grid-template-columns:1fr}.board-head{flex-direction:column}.prize{width:68px}th,td{padding:7px 4px}.num{padding:4px 5px;font-size:12px}.duoi{grid-template-columns:repeat(5,1fr)}.back{padding:9px 10px}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <button class="back" onclick="goBack()">← Trở về</button>
+      <div class="brand"><b>Không gian Xổ số Miền Trung</b><span>Tách riêng khỏi miền Nam · 100 bản hiển thị độc lập</span></div>
+      <div class="status">Đã khóa phần ổn định</div>
+    </header>
+
+    <section class="hero">
+      <h1>XSMT — Bản HTML hoàn chỉnh</h1>
+      <p>File này là một không gian riêng cho xổ số miền Trung. Dữ liệu mẫu đang dùng kết quả ngày 22/06/2026 với 2 đài: Huế và Phú Yên. Có đủ 100 bản/khu vực hiển thị để sau này bạn gắn vào router hoặc chia thành nhiều phòng.</p>
+      <div class="note">Chỉ hiển thị kết quả và dò dữ liệu. Không có lời khuyên cá cược, không dự đoán, không soi cầu.</div>
+    </section>
+
+    <section class="controls">
+      <input id="searchBox" type="search" placeholder="Tìm bản, tỉnh, mã: ví dụ Huế, Phú Yên, XSMT-001..." />
+      <select id="provinceFilter">
+        <option value="all">Tất cả tỉnh</option>
+        <option value="Huế">Huế</option>
+        <option value="Phú Yên">Phú Yên</option>
+      </select>
+      <select id="viewFilter">
+        <option value="all">Hiện 100 bản</option>
+        <option value="first10">Chỉ 10 bản đầu</option>
+        <option value="last10">Chỉ 10 bản cuối</option>
+      </select>
+    </section>
+
+    <nav class="tabs" id="tabs"></nav>
+
+    <section class="summary">
+      <div class="metric"><small>Tổng số bản</small><b id="mBoards">100</b></div>
+      <div class="metric"><small>Số tỉnh trong dữ liệu</small><b>2</b></div>
+      <div class="metric"><small>Ngày dữ liệu mẫu</small><b>22/06</b></div>
+      <div class="metric"><small>Chế độ</small><b>Tĩnh</b></div>
+    </section>
+
+    <section id="boardGrid" class="grid"></section>
+    <div id="empty" class="empty hidden">Không có bản nào khớp bộ lọc hiện tại.</div>
+
+    <footer class="footer">
+      Nguồn dữ liệu mẫu: kết quả XSMT ngày 22/06/2026 được nhập cứng để chạy offline. Muốn tự cập nhật hằng ngày thì thay object DATA hoặc gắn API/iframe hợp lệ vào lớp dữ liệu.
+      <br><span class="warn">Cảnh báo: file này không đưa ra khuyến nghị mua vé, không phân tích cầu, không khuyến khích cá cược.</span>
+    </footer>
+  </main>
+
+<script>
+(function(){
+  "use strict";
+
+  const DATA = {
+    date: "22/06/2026",
+    weekday: "Thứ hai",
+    region: "Miền Trung",
+    provinces: [
+      {
+        name: "Huế",
+        code: "XSH",
+        prizes: {
+          "Giải 8": ["43"],
+          "Giải 7": ["828"],
+          "Giải 6": ["3200", "8783", "1819"],
+          "Giải 5": ["9655"],
+          "Giải 4": ["48607", "92193", "33658", "00283", "75552", "48062", "33641"],
+          "Giải 3": ["63545", "41808"],
+          "Giải 2": ["74557"],
+          "Giải 1": ["85901"],
+          "Đặc biệt": ["122206"]
+        }
+      },
+      {
+        name: "Phú Yên",
+        code: "XSPY",
+        prizes: {
+          "Giải 8": ["70"],
+          "Giải 7": ["407"],
+          "Giải 6": ["2696", "8078", "9341"],
+          "Giải 5": ["7887"],
+          "Giải 4": ["31203", "96119", "68441", "50791", "82344", "81347", "80469"],
+          "Giải 3": ["82119", "29145"],
+          "Giải 2": ["86332"],
+          "Giải 1": ["75346"],
+          "Đặc biệt": ["957368"]
+        }
+      }
+    ]
+  };
+
+  const PRIZE_ORDER = ["Giải 8", "Giải 7", "Giải 6", "Giải 5", "Giải 4", "Giải 3", "Giải 2", "Giải 1", "Đặc biệt"];
+  const BOARD_TOTAL = 100;
+  const tabs = ["Tất cả", "001-025", "026-050", "051-075", "076-100"];
+  let activeTab = "Tất cả";
+
+  const grid = document.getElementById("boardGrid");
+  const empty = document.getElementById("empty");
+  const searchBox = document.getElementById("searchBox");
+  const provinceFilter = document.getElementById("provinceFilter");
+  const viewFilter = document.getElementById("viewFilter");
+  const tabsEl = document.getElementById("tabs");
+  const mBoards = document.getElementById("mBoards");
+
+  function pad3(n){ return String(n).padStart(3,"0"); }
+
+  function allNumbersForProvince(province){
+    const list = [];
+    PRIZE_ORDER.forEach(function(prize){ province.prizes[prize].forEach(function(n){ list.push(n); }); });
+    return list;
+  }
+
+  function lastTwo(n){ return n.slice(-2); }
+
+  function buildDauDuoi(province){
+    const buckets = Array.from({length:10}, function(){ return []; });
+    allNumbersForProvince(province).forEach(function(n){
+      const two = lastTwo(n);
+      const dau = Number(two[0]);
+      buckets[dau].push(two);
+    });
+    return buckets.map(function(arr, i){
+      const content = arr.length ? arr.join(", ") : "–";
+      return `<span><b>${i}</b><br>${content}</span>`;
+    }).join("");
+  }
+
+  function renderNumbers(arr, special){
+    return arr.map(function(n){ return `<span class="num">${n}</span>`; }).join(" ");
+  }
+
+  function makeBoard(index){
+    const id = `XSMT-${pad3(index)}`;
+    const provinceA = DATA.provinces[0];
+    const provinceB = DATA.provinces[1];
+    const rows = PRIZE_ORDER.map(function(prize){
+      const isDb = prize === "Đặc biệt";
+      return `<tr class="${isDb ? "db" : ""}">
+        <td class="prize">${prize}</td>
+        <td>${renderNumbers(provinceA.prizes[prize], isDb)}</td>
+        <td>${renderNumbers(provinceB.prizes[prize], isDb)}</td>
+      </tr>`;
+    }).join("");
+
+    return `<article class="board" data-id="${id}" data-index="${index}" data-search="${id} ${provinceA.name} ${provinceA.code} ${provinceB.name} ${provinceB.code} ${DATA.date}">
+      <div class="board-head">
+        <div class="board-title">
+          <h2>${id} · ${DATA.region}</h2>
+          <p>${DATA.weekday}, ${DATA.date} · ${provinceA.name} / ${provinceB.name}</p>
+        </div>
+        <div class="badge">Bản ${pad3(index)}</div>
+      </div>
+      <table aria-label="Kết quả ${id}">
+        <thead>
+          <tr><th>Giải</th><th class="province">${provinceA.name}<br>${provinceA.code}</th><th class="province">${provinceB.name}<br>${provinceB.code}</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="lotto">
+        <h3>Bảng 2 số cuối — ${provinceA.name}</h3>
+        <div class="duoi">${buildDauDuoi(provinceA)}</div>
+      </div>
+      <div class="lotto">
+        <h3>Bảng 2 số cuối — ${provinceB.name}</h3>
+        <div class="duoi">${buildDauDuoi(provinceB)}</div>
+      </div>
+    </article>`;
+  }
+
+  function renderTabs(){
+    tabsEl.innerHTML = tabs.map(function(t){
+      return `<button class="tab ${t === activeTab ? "active" : ""}" data-tab="${t}">${t}</button>`;
+    }).join("");
+    tabsEl.querySelectorAll(".tab").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        activeTab = btn.getAttribute("data-tab");
+        renderTabs();
+        applyFilters();
+      });
+    });
+  }
+
+  function inTabRange(index){
+    if(activeTab === "Tất cả") return true;
+    if(activeTab === "001-025") return index >= 1 && index <= 25;
+    if(activeTab === "026-050") return index >= 26 && index <= 50;
+    if(activeTab === "051-075") return index >= 51 && index <= 75;
+    if(activeTab === "076-100") return index >= 76 && index <= 100;
+    return true;
+  }
+
+  function inViewRange(index){
+    const v = viewFilter.value;
+    if(v === "first10") return index <= 10;
+    if(v === "last10") return index >= 91;
+    return true;
+  }
+
+  function applyFilters(){
+    const q = searchBox.value.trim().toLowerCase();
+    const province = provinceFilter.value;
+    let shown = 0;
+    grid.querySelectorAll(".board").forEach(function(card){
+      const index = Number(card.getAttribute("data-index"));
+      const hay = card.getAttribute("data-search").toLowerCase();
+      const matchText = q === "" || hay.includes(q);
+      const matchProvince = province === "all" || hay.includes(province.toLowerCase());
+      const visible = matchText && matchProvince && inTabRange(index) && inViewRange(index);
+      card.classList.toggle("hidden", !visible);
+      if(visible) shown++;
+    });
+    mBoards.textContent = String(shown);
+    empty.classList.toggle("hidden", shown !== 0);
+  }
+
+  function boot(){
+    let html = "";
+    for(let i=1;i<=BOARD_TOTAL;i++) html += makeBoard(i);
+    grid.innerHTML = html;
+    renderTabs();
+    searchBox.addEventListener("input", applyFilters);
+    provinceFilter.addEventListener("change", applyFilters);
+    viewFilter.addEventListener("change", applyFilters);
+    applyFilters();
+  }
+
+  window.goBack = function(){
+    if(window.history.length > 1){ window.history.back(); return; }
+    window.location.href = "./index.html";
+  };
+
+  boot();
+})();
+</script>
+</body>
+</html>

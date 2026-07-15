@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Super App Xổ Số V10 - Tần Suất Lô</title>
+<style>
+    /* ============================================================
+       RESET + ENGINE FONT (FIX: optimizeLegibility chỉ áp cho chữ,
+       không áp toàn cục để tránh tụt hiệu năng khi render 3000+ ô)
+       ============================================================ */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        scrollbar-width: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+    *::-webkit-scrollbar { display: none; }
+
+    /* Font số dùng chung: tabular-nums để số không nhảy/lệch khi quay & không lem */
+    .num-font {
+        font-family: "SF Mono", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-variant-numeric: tabular-nums lining-nums;
+        font-feature-settings: "tnum" 1, "lnum" 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
+    html, body { height: 100%; }
+    body {
+        background-color: #050505;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        height: 100dvh;
+        overflow: hidden;
+        width: 100vw;
+    }
+
+    /* ============================================================
+       BIẾN MÀU – LIGHT
+       ============================================================ */
+    .app-wrapper {
+        --bg-main: #ffffff; --bg-board: #cbd5e1; --text-main: #111111; --text-dim: #6b7280;
+        --border-color: #cbd5e1;
+        --db-bg: #d40000; --db-text: #ffffff; --led-color: #00e676; --led-bg: #111111;
+        --sheet-bg: #f8f9fa; --block-text: #333333;
+        --cell-bg: #ffffff; --cell-border: #e2e8f0;
+        --sticky-bg: #f1f5f9; --sticky-text: #d40000;
+        --block-bg: #ffffff;
+        --lo-chip-bg: linear-gradient(135deg, #d40000, #ff5252);
+        --lo-chip-shadow: rgba(212,0,0,0.4);
+        --tv-bg-base: #0a0f18; --tv-border: #1e293b;
+        --modal-overlay: rgba(0,0,0,0.45);
+        --glass-bg: linear-gradient(180deg, #ffffff 0%, #eef2f7 100%);
+        --glass-shadow: inset 0 2px 4px rgba(255,255,255,1), 0 2px 5px rgba(0,0,0,0.08);
+        --glass-border: #cbd5e1;
+        --ai-bar-bg: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        --ai-bar-border: #90caf9; --ai-bar-text: #1565c0; --ai-bar-input: #ffffff;
+    }
+    /* ============================================================
+       BIẾN MÀU – DARK
+       ============================================================ */
+    #toggle-dark:checked ~ .app-wrapper {
+        --bg-main: #121212; --bg-board: #0f172a; --text-main: #ffffff; --text-dim: #94a3b8;
+        --border-color: #334155;
+        --sheet-bg: #0b0f17; --block-text: #dddddd;
+        --cell-bg: #1e293b; --cell-border: #334155;
+        --sticky-bg: #0f172a; --sticky-text: #ff5252;
+        --block-bg: #1e293b;
+        --lo-chip-bg: linear-gradient(135deg, #ff1744, #d50000);
+        --lo-chip-shadow: rgba(255, 23, 68, 0.4);
+        --tv-bg-base: #05080f; --tv-border: #334155;
+        --modal-overlay: rgba(0,0,0,0.72);
+        --glass-bg: linear-gradient(180deg, #243044 0%, #161f30 100%);
+        --glass-shadow: inset 0 1px 2px rgba(255,255,255,0.07), 0 3px 6px rgba(0,0,0,0.45);
+        --glass-border: #334155;
+        --ai-bar-bg: linear-gradient(135deg, #0f2440, #102a4d);
+        --ai-bar-border: #1e3a5f; --ai-bar-text: #7cc4ff; --ai-bar-input: #0f172a;
+    }
+
+    .app-wrapper {
+        max-width: 480px; width: 100%; height: 100%;
+        position: relative; background-color: var(--bg-main);
+        color: var(--text-main); overflow: hidden;
+        box-shadow: 0 0 40px rgba(0,0,0,0.9);
+    }
+
+    /* ============================================================
+       LỚP 1: LUỒNG LỊCH SỬ
+       ============================================================ */
+    .main-layer { width: 100%; height: 100%; display: flex; flex-direction: column; background: var(--bg-board); transition: background .3s ease; }
+
+    .top-controls { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: var(--bg-main); border-bottom: 1px solid var(--border-color); z-index: 5; }
+    .top-controls-left, .top-controls-right { display: flex; gap: 14px; align-items: center; }
+
+    .switch-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .switch-label-text { font-size: 10px; font-weight: 700; color: var(--text-main); text-transform: uppercase; letter-spacing: .3px; }
+    .switch { position: relative; display: inline-block; width: 36px; height: 18px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch input:disabled + .slider { opacity: .5; cursor: not-allowed; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #cbd5e1; transition: .3s; border-radius: 20px; box-shadow: inset 0 1px 3px rgba(0,0,0,.2); }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: #fff; transition: .3s; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+    input:checked + .slider { background-color: var(--db-bg); }
+    input:checked + .slider:before { transform: translateX(18px); }
+
+    .boards-feed { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px 12px; display: flex; flex-direction: column; gap: 24px; -webkit-overflow-scrolling: touch; }
+
+    .board { background: var(--bg-main); border-radius: 14px; border: 1px solid var(--border-color); padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,.02), 0 8px 16px rgba(0,0,0,.05); transition: background .3s ease, border-color .3s ease; }
+    .board-header { text-align: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1.5px dashed var(--border-color); }
+    .board-title { font-size: 17px; font-weight: 900; color: var(--text-main); text-transform: uppercase; letter-spacing: .5px; }
+    .board-title.live { color: var(--db-bg); text-shadow: 0 2px 4px rgba(212,0,0,.18); }
+    .status-blink { font-size: 12px; color: var(--db-bg); animation: blink 1.2s infinite; font-weight: 700; margin-top: 4px; }
+    .board-date { font-size: 13px; color: var(--text-dim); font-style: italic; margin-top: 4px; font-weight: 700; text-transform: capitalize; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+    .row { display: flex; margin-bottom: 6px; align-items: stretch; gap: 6px; }
+    .prize-name { width: 40px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: 900; background: var(--glass-bg); box-shadow: var(--glass-shadow); border: 1px solid var(--glass-border); border-radius: 7px; transition: all .2s; color: var(--text-main); }
+    .prize-name.db { background: linear-gradient(180deg, #e53935 0%, #b71c1c 100%); color: #fff; border: 1px solid #c62828; box-shadow: inset 0 2px 4px rgba(255,255,255,.35), 0 2px 4px rgba(0,0,0,.2); }
+    .prize-name.active-led { background: var(--led-bg); color: var(--led-color); border-color: var(--led-color); box-shadow: 0 0 12px var(--led-color); transform: scale(1.05); z-index: 2; }
+
+    .prize-results { flex-grow: 1; display: grid; gap: 4px; min-width: 0; }
+    .grid-1 { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .grid-6 { grid-template-columns: repeat(6, 1fr); }
+
+    /* GLASS BOX – FIX tràn ô: overflow visible cho hover/cầu, min-width:0 cho grid */
+    .number-box {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-shadow);
+        display: flex; justify-content: center; align-items: center;
+        border-radius: 7px; height: 34px; position: relative;
+        cursor: default; min-width: 0;
+        transition: transform .2s cubic-bezier(.175,.885,.32,1.275), box-shadow .2s, border-color .2s;
+    }
+    .board-live-cau .number-box, .cau-on .number-box { cursor: pointer; }
+    .number-box:hover { transform: scale(1.06); box-shadow: 0 6px 15px rgba(0,0,0,.15); border-color: var(--db-bg); z-index: 10; }
+    .number-box:active { transform: scale(.96); }
+
+    /* FONT SỐ – FIX lem & tràn: weight 700, tabular-nums, letter-spacing vừa phải,
+       dùng clamp theo từng loại lưới để 5 chữ số luôn vừa ô hẹp (grid-6) */
+    .number-text {
+        font-size: clamp(13px, 4.4vw, 17px);
+        font-weight: 700; letter-spacing: 1.5px;
+        display: flex; align-items: center; justify-content: center;
+        white-space: nowrap; width: 100%; max-width: 100%; padding: 0 2px;
+        transition: color .2s; color: var(--text-main); line-height: 1;
+    }
+    .grid-3 .number-text { font-size: clamp(12px, 4vw, 16px); letter-spacing: 1px; }
+    .grid-4 .number-text { font-size: clamp(11px, 3.4vw, 15px); letter-spacing: .5px; }
+    .grid-6 .number-text { font-size: clamp(10px, 3vw, 14px); letter-spacing: .3px; padding: 0 1px; }
+
+    .row-db .number-box { height: 52px; }
+    .row-db .number-text { font-size: clamp(24px, 8.5vw, 34px); color: var(--db-bg); letter-spacing: 4px; z-index: 1; text-shadow: 0 2px 4px rgba(0,0,0,.1); padding-left: 4px; }
+    .number-text.spinning { color: var(--db-bg); filter: blur(.4px); opacity: .75; }
+
+    /* CHỮ SỐ "LÀM CẦU" – FIX clip: không còn margin gây tràn, dùng inset thay translateY */
+    .digit { display: inline-block; transition: all .2s cubic-bezier(.175,.885,.32,1.275); border-radius: 4px; padding: 0 1px; position: relative; }
+    .digit.active-cau { background: var(--db-bg); color: #fff; transform: scale(1.18); box-shadow: 0 0 0 1px var(--db-bg), 0 0 10px rgba(212,0,0,.7); z-index: 5; font-weight: 800; }
+
+    /* "LẶN SỐ ĐB" – ĐÃ TRIỂN KHAI HOÀN CHỈNH (trước đây thiếu CSS + JS) */
+    .mask-cover {
+        position: absolute; inset: 0; border-radius: 7px;
+        background: repeating-linear-gradient(45deg, #b71c1c, #b71c1c 10px, #d40000 10px, #d40000 20px);
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        color: #fff; font-size: 13px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;
+        cursor: pointer; z-index: 4; opacity: 0; pointer-events: none;
+        transition: opacity .3s ease;
+        box-shadow: inset 0 0 20px rgba(0,0,0,.4);
+    }
+    .mask-cover .eye { font-size: 18px; }
+    .masking .row-db .mask-cover { opacity: 1; pointer-events: auto; }
+    .masking .row-db .number-text { opacity: 0; }
+    .row-db .number-box.revealed .mask-cover { opacity: 0 !important; pointer-events: none !important; }
+
+    /* MODAL LÀM CẦU – dialog gọn, bỏ mũi tên gây hiểu lầm vị trí */
+    .cau-modal { position: absolute; inset: 0; z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+    .cau-modal.show { opacity: 1; pointer-events: all; background: var(--modal-overlay); backdrop-filter: blur(3px); }
+    .cau-modal-content { background: #1a1d24; border-radius: 14px; border: 1px solid #2d3340; padding: 16px; transform: scale(.9) translateY(20px); transition: transform .3s cubic-bezier(.175,.885,.32,1.275); box-shadow: 0 20px 50px rgba(0,0,0,.8), inset 0 2px 4px rgba(255,255,255,.05); display: flex; flex-direction: column; gap: 12px; width: 86%; max-width: 320px; }
+    .cau-modal.show .cau-modal-content { transform: scale(1) translateY(0); }
+    .cau-modal-head { color: #cbd5e1; font-size: 12px; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: .5px; }
+    .cau-modal-head b { color: #ff5252; }
+    .cau-modal-digits { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .cau-btn-digit { width: 48px; height: 48px; border-radius: 10px; border: 1px solid #343b4a; background: #232833; font-size: 22px; font-weight: 700; color: #fff; cursor: pointer; transition: all .2s cubic-bezier(.175,.885,.32,1.275); box-shadow: 0 4px 6px rgba(0,0,0,.3); display: flex; justify-content: center; align-items: center; }
+    .cau-btn-digit:active { transform: scale(.85); }
+    .cau-btn-digit.selected { background: #d40000; color: #fff; border-color: #ff5252; transform: scale(1.08); box-shadow: 0 6px 15px rgba(212,0,0,.6), inset 0 2px 4px rgba(255,255,255,.3); }
+    .cau-modal-close { align-self: center; background: #343b4a; color: #fff; border: none; padding: 8px 22px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: .5px; }
+    .cau-modal-close:active { transform: scale(.94); }
+
+    /* SLOT LÔ RƠI */
+    .injected-slot { background: var(--bg-main); border: 1.5px solid var(--db-bg); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 6px 16px rgba(212,0,0,.12); }
+    .slot-title { font-size: 12px; font-weight: 900; color: var(--db-bg); text-align: center; text-transform: uppercase; letter-spacing: .5px; transition: all .3s; padding: 4px 8px; border-radius: 6px; }
+    .slot-title.flash { background: var(--db-bg); color: #fff; box-shadow: 0 0 15px rgba(212,0,0,.6); transform: scale(1.02); }
+    .loto-grid { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 5px; width: 100%; min-height: 26px; }
+    .lo-chip { background: var(--lo-chip-bg); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .5px; padding: 4px 8px; border-radius: 5px; box-shadow: 0 2px 4px var(--lo-chip-shadow), inset 0 1px 0 rgba(255,255,255,.3); transform: scale(0); animation: springDrop .5s cubic-bezier(.175,.885,.32,1.275) forwards; }
+    @keyframes springDrop { 0% { transform: scale(0) translateY(-20px) rotate(-5deg); opacity: 0; } 100% { transform: scale(1) translateY(0) rotate(0); opacity: 1; } }
+
+    .dots-wrapper { display: flex; justify-content: center; align-items: center; gap: 3px; width: 100%; }
+    .dot { width: 5px; height: 5px; background-color: var(--text-dim); border-radius: 50%; animation: wave 1.2s infinite ease-in-out; }
+    .dot:nth-child(2) { animation-delay: -1.1s; } .dot:nth-child(3) { animation-delay: -1s; } .dot:nth-child(4) { animation-delay: -.9s; } .dot:nth-child(5) { animation-delay: -.8s; }
+    @keyframes wave { 0%,40%,100% { transform: translateY(0); opacity: .5; } 20% { transform: translateY(-3px); opacity: 1; } }
+
+    /* AI STICKY BAR – FIX: theo dark mode + marquee bằng CSS thay <marquee> */
+    .ai-sticky-bar { background: var(--ai-bar-bg); border-top: 1px solid var(--ai-bar-border); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 10px; z-index: 10; box-shadow: 0 -4px 10px rgba(0,0,0,.06); }
+    .ai-marquee { flex-grow: 1; overflow: hidden; white-space: nowrap; min-width: 0; }
+    .ai-marquee span { display: inline-block; padding-left: 100%; font-size: 13px; font-weight: 700; color: var(--ai-bar-text); animation: marquee 18s linear infinite; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+    .ai-input { padding: 7px 13px; border-radius: 20px; border: 1px solid var(--ai-bar-border); font-size: 12px; width: 120px; outline: none; background: var(--ai-bar-input); color: var(--text-main); }
+
+    /* ============================================================
+       LỚP 2: THỐNG KÊ LÔ TÔ (TOP SHEET)
+       ============================================================ */
+    .top-sheet { position: absolute; inset: 0; background: var(--sheet-bg); z-index: 20; transform: translateY(-100%); transition: transform .4s cubic-bezier(.2,.8,.2,1); display: flex; flex-direction: column; }
+    .top-tab { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); background: linear-gradient(180deg, #1976d2, #1565c0); color: #fff; padding: 6px 20px; font-size: 12px; font-weight: 900; text-transform: uppercase; border-radius: 0 0 12px 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,.3); border: 2px solid #0d47a1; border-top: none; z-index: 25; }
+    #toggle-top:checked ~ .app-wrapper .top-sheet { transform: translateY(0); }
+
+    .sheet-header { padding: 14px 16px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); background: var(--bg-main); z-index: 5; }
+    .btn-back { background: var(--bg-board); color: var(--text-main); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid var(--border-color); margin-right: 14px; }
+    .sheet-title { font-size: 16px; font-weight: 900; color: var(--text-main); text-transform: uppercase; }
+
+    .sheet-content-loto { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; overflow-x: hidden; }
+
+    .slider-viewport { flex: 2; width: 100%; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,.1); background: var(--block-bg); border: 1px solid var(--border-color); overflow: hidden; position: relative; min-height: 300px; }
+    .slider-track { display: flex; width: 200%; height: 100%; transition: transform .5s cubic-bezier(.16,1,.3,1); }
+    .slide-pane { width: 50%; height: 100%; flex-shrink: 0; display: flex; flex-direction: column; }
+
+    .block-title-bar { background: linear-gradient(90deg, #d40000, #ff5252); color: #fff; padding: 8px 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; }
+    .matrix-container { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; background: var(--cell-bg); }
+    .matrix-table { border-collapse: collapse; table-layout: fixed; }
+    .matrix-table th, .matrix-table td { width: 28px; height: 28px; min-width: 28px; max-width: 28px; border: 1px solid var(--cell-border); text-align: center; vertical-align: middle; font-size: 10px; font-weight: 700; color: var(--text-main); }
+    .matrix-table thead th { position: sticky; top: 0; z-index: 2; background: var(--sticky-bg); color: var(--text-main); }
+    .matrix-table tbody th { position: sticky; left: 0; z-index: 2; background: var(--sticky-bg); color: var(--sticky-text); transition: all .3s; }
+    .matrix-table thead th.corner-h { position: sticky; top: 0; left: 0; z-index: 3; background: #333; color: #fff; }
+    .data-cell { color: var(--text-main); font-weight: 900; font-size: 13px; opacity: .9; }
+    .row-th.search-hit { background: #ffd54f !important; color: #111 !important; box-shadow: 0 0 10px #ffb300; }
+    td.search-hit { background: rgba(255,213,79,.35) !important; }
+
+    .gan-alert { background: var(--db-bg) !important; color: #fff !important; animation: ganPulse 1.5s infinite alternate; cursor: pointer; z-index: 10 !important; position: relative; }
+    @keyframes ganPulse { 0% { box-shadow: 0 0 4px var(--db-bg); } 100% { box-shadow: 0 0 16px var(--db-bg); } }
+    .gan-tooltip { position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: #111; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; white-space: nowrap; pointer-events: none; opacity: 0; visibility: hidden; transition: all .2s; box-shadow: 0 4px 10px rgba(0,0,0,.5); z-index: 100; border: 1px solid #ff5252; font-weight: 500; letter-spacing: 0; text-transform: none; }
+    .gan-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border-width: 5px; border-style: solid; border-color: #111 transparent transparent transparent; }
+    .gan-alert.show-tooltip .gan-tooltip { opacity: 1; visibility: visible; bottom: 125%; }
+
+    .tv-header { background: #000; color: #fff; padding: 8px 12px; font-weight: 700; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--tv-border); z-index: 10; position: relative; }
+    .btn-tv-close { background: #333; border: none; color: #fff; padding: 5px 9px; border-radius: 5px; font-size: 10px; cursor: pointer; }
+    .tv-screen { --ai-core: rgba(59,130,246,.2); --ai-glow: rgba(59,130,246,.6); --ai-text: #38bdf8; --ai-badge-border: #38bdf8; --ai-badge-bg: rgba(56,189,248,.1); flex: 1; background: var(--tv-bg-base); padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 0 40px rgba(0,0,0,.8), inset 0 0 20px var(--ai-glow); position: relative; overflow-y: auto; transition: box-shadow .5s ease; }
+    .tv-screen.theme-red { --ai-core: rgba(239,68,68,.2); --ai-glow: rgba(239,68,68,.6); --ai-text: #fca5a5; --ai-badge-border: #ef4444; --ai-badge-bg: rgba(239,68,68,.15); }
+    .tv-screen.theme-green { --ai-core: rgba(16,185,129,.2); --ai-glow: rgba(16,185,129,.6); --ai-text: #6ee7b7; --ai-badge-border: #10b981; --ai-badge-bg: rgba(16,185,129,.12); }
+    .tv-circuit { position: absolute; inset: 0; background-image: linear-gradient(var(--ai-core) 1px, transparent 1px), linear-gradient(90deg, var(--ai-core) 1px, transparent 1px); background-size: 20px 20px; opacity: .25; z-index: 1; pointer-events: none; animation: circuitPulse 3s infinite alternate; }
+    @keyframes circuitPulse { 0% { opacity: .1; } 100% { opacity: .3; } }
+    .tv-data-stream { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, var(--ai-glow) 50%, transparent 100%); background-size: 100% 200%; opacity: .15; z-index: 1; pointer-events: none; animation: dataStream 2.5s linear infinite; }
+    @keyframes dataStream { 0% { background-position: 0 -100%; } 100% { background-position: 0 200%; } }
+    .tv-content-layer { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 100%; }
+    .tv-text-bot { color: var(--ai-text); font-family: ui-monospace, monospace; font-size: 13px; text-align: center; margin-bottom: 15px; text-shadow: 0 0 5px var(--ai-glow); line-height: 1.6; }
+    .tv-results { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%; }
+    .xien-badge { background: var(--ai-badge-bg); border: 1px solid var(--ai-badge-border); color: var(--ai-badge-border); padding: 8px 16px; border-radius: 8px; font-size: 16px; font-weight: 900; letter-spacing: 1px; box-shadow: 0 0 10px rgba(0,0,0,.5); animation: badgePop .4s cubic-bezier(.175,.885,.32,1.275) forwards; text-align: center; }
+    @keyframes badgePop { 0% { transform: scale(.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+    .loto-block-2 { border-radius: 14px; background: var(--bg-main); border: 1px solid var(--border-color); padding: 16px; box-shadow: 0 4px 6px rgba(0,0,0,.05), 0 10px 15px rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 16px; }
+    .block-title-2 { font-size: 13px; font-weight: 900; color: var(--db-bg); text-transform: uppercase; border-bottom: 1.5px dashed var(--border-color); padding-bottom: 8px; }
+    .special-btn-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .btn-special { padding: 10px 4px; border-radius: 10px; font-size: 10px; font-weight: 900; color: #fff; border: none; cursor: pointer; text-transform: uppercase; transition: all .2s cubic-bezier(.175,.885,.32,1.275); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; letter-spacing: .5px; text-align: center; }
+    .btn-special .icon { font-size: 18px; }
+    .btn-special:active { transform: scale(.92); }
+    .btn-xien { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 10px rgba(245,158,11,.3); }
+    .btn-nhipdep { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 10px rgba(16,185,129,.3); }
+    .btn-bacnho { background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 10px rgba(59,130,246,.3); }
+    .search-group { display: flex; gap: 10px; }
+    .search-input { flex: 1; padding: 12px 16px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-board); color: var(--text-main); font-size: 16px; font-weight: 700; outline: none; transition: border-color .2s, box-shadow .2s; letter-spacing: 2px; }
+    .search-input:focus { border-color: var(--db-bg); box-shadow: 0 0 0 3px rgba(212,0,0,.15); }
+    .search-input::placeholder { color: var(--text-dim); font-weight: 400; font-size: 13px; letter-spacing: 0; }
+    .btn-search { padding: 0 20px; border-radius: 10px; border: none; background: var(--db-bg); color: #fff; font-weight: 900; font-size: 13px; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 10px rgba(212,0,0,.3); transition: transform .1s; }
+    .btn-search:active { transform: scale(.92); }
+
+    #keyboard-wrapper { display: none; }
+    .loto-block-kb { border-radius: 14px; display: flex; flex-direction: column; gap: 10px; padding: 16px; background: var(--block-bg); box-shadow: 0 4px 6px rgba(0,0,0,.05); border: 1px solid var(--border-color); }
+    .vk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .vk-btn { background: var(--bg-board); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px 0; font-size: 20px; font-weight: 700; cursor: pointer; transition: all .1s; box-shadow: 0 2px 0 var(--border-color); display: flex; justify-content: center; align-items: center; }
+    .vk-btn:active { transform: translateY(2px); box-shadow: none; background: var(--border-color); }
+    .vk-action { font-size: 14px; background: var(--sheet-bg); }
+    .vk-del { color: var(--db-bg); }
+
+    .lo-top-board { border-radius: 14px; background: var(--bg-main); border: 1px solid var(--border-color); padding: 16px 12px 0; box-shadow: 0 4px 6px rgba(0,0,0,.05), 0 10px 15px rgba(0,0,0,.08); display: flex; flex-direction: column; min-height: 220px; }
+    .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 160px; padding-top: 30px; gap: clamp(2px, 1vw, 6px); border-bottom: 2px solid var(--border-color); flex: 1; }
+    .bar-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; height: 100%; position: relative; transition: transform .3s; }
+    .bar-wrapper:hover { transform: translateY(-5px); }
+    .bar-number { font-weight: 700; font-size: 14px; color: var(--text-main); margin-bottom: 4px; }
+    .bar-column { width: 100%; border-radius: 6px 6px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; box-shadow: 0 4px 10px rgba(0,0,0,.1), inset 0 2px 5px rgba(255,255,255,.4); transform-origin: bottom; animation: growUp 1.1s cubic-bezier(.175,.885,.32,1.275) forwards; transform: scaleY(0); }
+    @keyframes growUp { to { transform: scaleY(1); } }
+    .bar-rank { font-size: 9px; font-weight: 700; color: #fff; writing-mode: vertical-rl; transform: rotate(180deg); text-shadow: 0 1px 2px rgba(0,0,0,.5); letter-spacing: 1px; }
+
+    /* ============================================================
+       LỚP 3: THỐNG KÊ ĐB (BOTTOM SHEET)
+       ============================================================ */
+    .bottom-sheet { position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; background: var(--sheet-bg); z-index: 20; transform: translateY(100%); transition: transform .4s cubic-bezier(.2,.8,.2,1); display: flex; flex-direction: column; }
+    .bottom-tab { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: linear-gradient(0deg, #d32f2f, #c62828); color: #fff; padding: 6px 20px; font-size: 12px; font-weight: 900; text-transform: uppercase; border-radius: 12px 12px 0 0; cursor: pointer; box-shadow: 0 -4px 10px rgba(0,0,0,.3); border: 2px solid #b71c1c; border-bottom: none; z-index: 25; }
+    #toggle-bottom:checked ~ .app-wrapper .bottom-sheet { transform: translateY(0); }
+    .sheet-content-db { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+    .db-stat-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; box-shadow: 0 4px 8px rgba(0,0,0,.05); }
+    .db-stat-card h4 { font-size: 13px; color: var(--db-bg); text-transform: uppercase; margin-bottom: 12px; border-bottom: 1.5px dashed var(--border-color); padding-bottom: 8px; }
+    .db-pair-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .db-pair { background: var(--glass-bg); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); border-radius: 8px; padding: 8px 0; text-align: center; }
+    .db-pair .p { font-size: 18px; font-weight: 800; color: var(--text-main); }
+    .db-pair .c { font-size: 10px; color: var(--text-dim); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<input type="checkbox" id="toggle-dark" hidden>
+<input type="checkbox" id="toggle-top" hidden>
+<input type="checkbox" id="toggle-bottom" hidden>
+
+<div class="app-wrapper" id="app-wrapper">
+
+    <!-- ===== LỚP 2: THỐNG KÊ LÔ TÔ ===== -->
+    <div class="top-sheet">
+        <div class="sheet-header">
+            <label for="toggle-top" class="btn-back">🔙 Quay lại</label>
+            <div class="sheet-title">📊 Thống Kê Lô Tô</div>
+        </div>
+        <div class="sheet-content-loto">
+            <div class="slider-viewport">
+                <div class="slider-track" id="main-slider-track">
+                    <div class="slide-pane">
+                        <div class="block-title-bar">Bố cục 1: Tần suất lô (30 ngày)</div>
+                        <div class="matrix-container">
+                            <table class="matrix-table" id="matrix-table">
+                                <thead><tr id="matrix-head"></tr></thead>
+                                <tbody id="matrix-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="slide-pane">
+                        <div class="tv-header"><span id="tv-header-title">📺 Hệ thống AI Calculator</span><button class="btn-tv-close" onclick="closeTV()">✖ Đóng</button></div>
+                        <div class="tv-screen theme-blue" id="ai-tv-screen">
+                            <div class="tv-circuit"></div><div class="tv-data-stream"></div>
+                            <div class="tv-content-layer">
+                                <div class="tv-text-bot" id="tv-message">👋 Chào bạn!<br>Hệ thống AI đã sẵn sàng hoạt động.</div>
+                                <div class="tv-results" id="tv-results-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loto-block-2">
+                <div class="block-title-2">⚡ Công cụ tính toán</div>
+                <div class="special-btn-group">
+                    <button class="btn-special btn-xien" onclick="activateXienAI()"><span class="icon">🔗</span><span>Ghép Xiên</span></button>
+                    <button class="btn-special btn-nhipdep" onclick="activateNhipDep()"><span class="icon">📈</span><span>Nhịp Đẹp</span></button>
+                    <button class="btn-special btn-bacnho" onclick="activateBacNhoAI()"><span class="icon">🧠</span><span>Bạc Nhớ</span></button>
+                </div>
+                <div class="search-group">
+                    <input type="text" class="search-input num-font" id="ai-search-input" placeholder="Chạm để nhập số..." readonly onclick="showKeyboard()">
+                    <button class="btn-search" onclick="runSearch()">Tìm</button>
+                </div>
+            </div>
+
+            <div id="keyboard-wrapper">
+                <div class="loto-block-kb">
+                    <div class="block-title-2" style="display:flex;justify-content:space-between;">
+                        <span>⌨ Bàn phím nhập liệu</span>
+                        <span style="cursor:pointer;color:var(--text-dim);" onclick="hideKeyboard()">Đóng ✖</span>
+                    </div>
+                    <div class="vk-grid num-font" id="virtual-keyboard">
+                        <button class="vk-btn" data-val="1">1</button><button class="vk-btn" data-val="2">2</button><button class="vk-btn" data-val="3">3</button>
+                        <button class="vk-btn" data-val="4">4</button><button class="vk-btn" data-val="5">5</button><button class="vk-btn" data-val="6">6</button>
+                        <button class="vk-btn" data-val="7">7</button><button class="vk-btn" data-val="8">8</button><button class="vk-btn" data-val="9">9</button>
+                        <button class="vk-btn vk-action" onclick="clearInput()">CLEAR</button><button class="vk-btn" data-val="0">0</button><button class="vk-btn vk-action vk-del" onclick="delInput()">DEL</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lo-top-board">
+                <div class="block-title-2">🏆 Bảng xếp hạng lô về nhiều nhất (30 ngày)</div>
+                <div class="chart-container" id="lo-top-chart"></div>
+            </div>
+        </div>
+        <label for="toggle-top" class="top-tab">▼ Kéo Thống Kê Lô Tô</label>
+    </div>
+
+    <!-- ===== LỚP 1: LUỒNG CHÍNH ===== -->
+    <div class="main-layer">
+        <div class="top-controls">
+            <div class="top-controls-left">
+                <div class="switch-wrap"><label class="switch"><input type="checkbox" id="toggle-cau" onchange="toggleCau(this)"><span class="slider"></span></label><span class="switch-label-text">Làm Cầu</span></div>
+                <div class="switch-wrap"><label class="switch"><input type="checkbox" id="toggle-quay-thu" onchange="triggerQuayThu(this)"><span class="slider"></span></label><span class="switch-label-text">Quay Thử</span></div>
+            </div>
+            <div class="top-controls-right">
+                <div class="switch-wrap"><label class="switch"><input type="checkbox" id="toggle-dark-vis" onchange="document.getElementById('toggle-dark').checked=this.checked"><span class="slider"></span></label><span class="switch-label-text">Sáng/Tối</span></div>
+                <div class="switch-wrap"><label class="switch"><input type="checkbox" id="toggle-mask-vis" onchange="toggleMask(this)"><span class="slider"></span></label><span class="switch-label-text">Lặn Số ĐB</span></div>
+            </div>
+        </div>
+
+        <div class="boards-feed" id="boards-feed-container">
+            <div class="board board-live-cau" id="board-live">
+                <div class="board-header">
+                    <div class="board-title live">🔴 Kết quả xổ số Thần Mèo</div>
+                    <div class="status-blink" id="live-status">⏳ Hãy bật công tắc "Quay Thử" ở trên...</div>
+                    <div class="board-date" id="live-date"></div>
+                </div>
+                <!-- ĐB lên trên cùng cho đúng chuẩn bảng KQ miền Bắc + đồng bộ với bảng lịch sử -->
+                <div class="row row-db" data-prize="ĐB" data-len="5">
+                    <div class="prize-name db">ĐB</div>
+                    <div class="prize-results grid-1">
+                        <div class="number-box">
+                            <div class="mask-cover" onclick="this.parentElement.classList.add('revealed')"><span class="eye">🙈</span> Chạm để xem</div>
+                            <span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" data-prize="G1" data-len="5"><div class="prize-name">G1</div><div class="prize-results grid-1"><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div></div></div>
+                <div class="row" data-prize="G2" data-len="5"><div class="prize-name">G2</div><div class="prize-results grid-2"><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div></div></div>
+                <div class="row" data-prize="G3" data-len="5"><div class="prize-name">G3</div><div class="prize-results grid-6"><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div></div></div>
+                <div class="row" data-prize="G4" data-len="4"><div class="prize-name">G4</div><div class="prize-results grid-4"><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div></div></div>
+                <div class="row" data-prize="G5" data-len="4"><div class="prize-name">G5</div><div class="prize-results grid-6"><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div></div></div>
+                <div class="row" data-prize="G6" data-len="3"><div class="prize-name">G6</div><div class="prize-results grid-3"><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></span></div></div></div>
+                <div class="row" data-prize="G7" data-len="2"><div class="prize-name">G7</div><div class="prize-results grid-4"><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span></div></span></div><div class="number-box"><span class="number-text num-font"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span></div></span></div></div></div>
+            </div>
+
+            <div class="injected-slot" id="custom-slot">
+                <div class="slot-title" id="slot-title">⚡ Bảng lô rơi sẽ hiển thị tại đây</div>
+                <div class="loto-grid" id="loto-drop-zone"></div>
+            </div>
+
+            <div id="history-boards-container"></div>
+        </div>
+
+        <div class="ai-sticky-bar">
+            <div class="ai-marquee"><span>🤖 Cuộn xuống để xem 40 bảng kết quả lịch sử · Bật "Quay Thử" để xem quay số trực tiếp · Bật "Làm Cầu" rồi chạm số để đánh dấu cầu chạy...</span></div>
+            <input type="text" class="ai-input" placeholder="Hỏi AI...">
+        </div>
+    </div>
+
+    <!-- ===== LỚP 3: THỐNG KÊ ĐB ===== -->
+    <div class="bottom-sheet">
+        <label for="toggle-bottom" class="bottom-tab">▲ Kéo Thống Kê ĐB</label>
+        <div class="sheet-header"><label for="toggle-bottom" class="btn-back">🔙 Quay lại</label><div class="sheet-title">🎯 Thống Kê Đặc Biệt</div></div>
+        <div class="sheet-content-db" id="db-content"></div>
+    </div>
+
+    <!-- MODAL LÀM CẦU -->
+    <div id="cau-modal" class="cau-modal" onmousedown="closeCauModal(event)" ontouchstart="closeCauModal(event)">
+        <div class="cau-modal-content" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+            <div class="cau-modal-head">Chọn chữ số làm cầu cho <b id="cau-modal-num"></b></div>
+            <div id="cau-modal-digits" class="cau-modal-digits num-font"></div>
+            <button class="cau-modal-close" onclick="closeCauModal()">Xong</button>
+        </div>
+    </div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   1. ENGINE DỮ LIỆU (FIX: dữ liệu nhất quán thay vì random mỗi ô)
+   Một bộ dữ liệu duy nhất sinh ra ở seed cố định -> ma trận tần
+   suất, lô gan, top lô, bạc nhớ ĐB đều khớp nhau & ổn định.
+   ============================================================ */
+function makeRNG(seed){ let s = seed >>> 0; return function(){ s = (s*1664525 + 1013904223) >>> 0; return s/4294967296; }; }
+const rng = makeRNG(20260326);
+const DAYS = 30;
+
+// freq[lo][day] = số lần lô về trong ngày đó (0..3)
+const LottoData = (() => {
+    const freq = [];
+    for (let lo = 0; lo <= 99; lo++){
+        const row = [];
+        const bias = 0.55 + (rng() * 0.35);          // mỗi lô có "thiên hướng" riêng
+        for (let d = 0; d < DAYS; d++){
+            let n = 0;
+            if (rng() < (0.30 * bias)) n = 1;
+            if (n && rng() < 0.18) n = 2;
+            if (n === 2 && rng() < 0.10) n = 3;
+            row.push(n);
+        }
+        freq.push(row);
+    }
+    // tổng tần suất + số ngày gan (số ngày gần nhất chưa về, đếm từ ngày mới nhất = cột cuối)
+    const totals = freq.map(r => r.reduce((a,b)=>a+b,0));
+    const gan = freq.map(r => {
+        let g = 0;
+        for (let d = DAYS-1; d >= 0; d--){ if (r[d] > 0) break; g++; }
+        return g;
+    });
+    return { freq, totals, gan };
+})();
+
+const pad2 = n => (n < 10 ? '0'+n : ''+n);
+
+/* ============================================================
+   2. TIỆN ÍCH SỐ
+   ============================================================ */
+function generateRandom(length){ let r=''; for(let i=0;i<length;i++) r += Math.floor(Math.random()*10); return r; }
+function wrapDigits(numStr){
+    if(!numStr) return '';
+    return numStr.split('').map((d,i)=>`<span class="digit" data-idx="${i}">${d}</span>`).join('');
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ============================================================
+   3. KHỞI TẠO
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+    setLiveDate();
+    buildMatrix();
+    renderTopLo();
+    renderDbStats();
+    setupKeyboard();
+    renderHistoricalBoards(40);
+    bindMatrixTooltips();
+    bindCauClicks();
+});
+
+function setLiveDate(){
+    const d = new Date(2026, 2, 26);
+    let s = d.toLocaleDateString('vi-VN', { weekday:'long', year:'numeric', month:'2-digit', day:'2-digit' });
+    document.getElementById('live-date').textContent = s.charAt(0).toUpperCase()+s.slice(1);
+}
+
+/* ---- Ma trận tần suất (head + body sinh bằng JS, nhất quán dữ liệu) ---- */
+function buildMatrix(){
+    const head = document.getElementById('matrix-head');
+    let h = '<th class="corner-h">Lô</th>';
+    for(let j=1;j<=DAYS;j++) h += `<th>${j}</th>`;
+    head.innerHTML = h;
+
+    const tbody = document.getElementById('matrix-body');
+    let rows = '';
+    for(let lo=0; lo<=99; lo++){
+        const isGan = LottoData.gan[lo] >= 12;             // gan thật: >=12 ngày chưa về
+        const thClass = isGan ? 'row-th gan-alert' : 'row-th';
+        const tip = isGan ? `<div class="gan-tooltip">⚠️ Gan ${LottoData.gan[lo]} ngày · Tổng về: ${LottoData.totals[lo]}</div>` : '';
+        rows += `<tr data-lo="${pad2(lo)}"><th class="${thClass}">${pad2(lo)}${tip}</th>`;
+        for(let d=0; d<DAYS; d++){
+            const v = LottoData.freq[lo][d];
+            rows += v>0 ? `<td class="data-cell">${v}</td>` : `<td></td>`;
+        }
+        rows += '</tr>';
+    }
+    tbody.innerHTML = rows;
+}
+
+function bindMatrixTooltips(){
+    document.getElementById('matrix-body').addEventListener('click', function(e){
+        const th = e.target.closest('th.gan-alert');
+        document.querySelectorAll('th.gan-alert.show-tooltip').forEach(el => { if(el!==th) el.classList.remove('show-tooltip'); });
+        if(th) th.classList.toggle('show-tooltip');
+    });
+}
+
+/* ---- Top lô về nhiều nhất (tính thật từ totals) ---- */
+function renderTopLo(){
+    const chart = document.getElementById('lo-top-chart');
+    const ranked = LottoData.totals.map((t,lo)=>({lo:pad2(lo), t}))
+                    .sort((a,b)=>b.t-a.t).slice(0,10);
+    const max = ranked[0].t || 1;
+    const palette = [
+        'linear-gradient(to top,#d50000,#ff1744)','linear-gradient(to top,#e65100,#ff9100)',
+        'linear-gradient(to top,#ef6c00,#ffb300)','linear-gradient(to top,#f57f17,#ffc400)',
+        'linear-gradient(to top,#fbc02d,#ffee58)','linear-gradient(to top,#afb42b,#d4e157)',
+        'linear-gradient(to top,#689f38,#9ccc65)','linear-gradient(to top,#0097a7,#4dd0e1)',
+        'linear-gradient(to top,#0288d1,#29b6f6)','linear-gradient(to top,#1976d2,#4fc3f7)'
+    ];
+    let html='';
+    ranked.forEach((item,idx)=>{
+        const height = 20 + Math.round((item.t/max)*80);
+        const glow = idx<3 ? `box-shadow:0 0 12px ${palette[idx].split(',')[1]};` : '';
+        const txt = idx===0 ? 'color:var(--db-bg);text-shadow:0 0 8px rgba(212,0,0,.5);transform:scale(1.3);' : '';
+        html += `<div class="bar-wrapper" title="Lô ${item.lo}: ${item.t} lần">
+            <div class="bar-number num-font" style="${txt}">${item.lo}</div>
+            <div class="bar-column" style="height:${height}%;background:${palette[idx]};${glow}animation-delay:${idx*0.08}s;">
+                <div class="bar-rank">TOP ${idx+1}</div></div></div>`;
+    });
+    chart.innerHTML = html;
+}
+
+/* ---- Thống kê ĐB (Lớp 3) – bạc nhớ + đầu/đuôi gan ---- */
+function renderDbStats(){
+    const wrap = document.getElementById('db-content');
+    // đầu - đuôi xuất hiện nhiều của 2 số cuối ĐB (mô phỏng từ totals)
+    const heads = Array(10).fill(0), tails = Array(10).fill(0);
+    LottoData.totals.forEach((t,lo)=>{ heads[Math.floor(lo/10)] += t; tails[lo%10] += t; });
+    const topGan = LottoData.gan.map((g,lo)=>({lo:pad2(lo),g})).sort((a,b)=>b.g-a.g).slice(0,10);
+
+    const cell = (arr,label) => arr.map((v,i)=>`<div class="db-pair"><div class="p num-font">${i}</div><div class="c">${label}: ${v}</div></div>`).join('');
+    wrap.innerHTML = `
+      <div class="db-stat-card"><h4>🔢 Đầu ĐB về nhiều (30 ngày)</h4><div class="db-pair-grid">${cell(heads,'lần')}</div></div>
+      <div class="db-stat-card"><h4>🔚 Đuôi ĐB về nhiều (30 ngày)</h4><div class="db-pair-grid">${cell(tails,'lần')}</div></div>
+      <div class="db-stat-card"><h4>🥶 Top 10 lô gan lì nhất</h4><div class="db-pair-grid">
+        ${topGan.map(x=>`<div class="db-pair"><div class="p num-font">${x.lo}</div><div class="c">gan ${x.g}n</div></div>`).join('')}
+      </div></div>`;
+}
+
+/* ============================================================
+   4. BẢNG LỊCH SỬ
+   ============================================================ */
+function renderHistoricalBoards(count){
+    const container = document.getElementById('history-boards-container');
+    if(!container) return;
+    const baseDate = new Date(2026, 2, 25);
+    const frag = [];
+    const box = (len) => `<div class="number-box"><span class="number-text num-font">${wrapDigits(generateRandom(len))}</span></div>`;
+    for(let i=0;i<count;i++){
+        const d = new Date(baseDate); d.setDate(d.getDate()-i);
+        let day = d.toLocaleDateString('vi-VN',{weekday:'long',year:'numeric',month:'2-digit',day:'2-digit'});
+        day = day.charAt(0).toUpperCase()+day.slice(1);
+        frag.push(`<div class="board" style="margin-bottom:0">
+            <div class="board-header"><div class="board-title">Kết quả xổ số Thần Mèo</div><div class="board-date">${day}</div></div>
+            <div class="row row-db" data-len="5"><div class="prize-name db">ĐB</div><div class="prize-results grid-1">${box(5)}</div></div>
+            <div class="row"><div class="prize-name">G1</div><div class="prize-results grid-1">${box(5)}</div></div>
+            <div class="row"><div class="prize-name">G2</div><div class="prize-results grid-2">${box(5)}${box(5)}</div></div>
+            <div class="row"><div class="prize-name">G3</div><div class="prize-results grid-6">${box(5)}${box(5)}${box(5)}${box(5)}${box(5)}${box(5)}</div></div>
+            <div class="row"><div class="prize-name">G4</div><div class="prize-results grid-4">${box(4)}${box(4)}${box(4)}${box(4)}</div></div>
+            <div class="row"><div class="prize-name">G5</div><div class="prize-results grid-6">${box(4)}${box(4)}${box(4)}${box(4)}${box(4)}${box(4)}</div></div>
+            <div class="row"><div class="prize-name">G6</div><div class="prize-results grid-3">${box(3)}${box(3)}${box(3)}</div></div>
+            <div class="row"><div class="prize-name">G7</div><div class="prize-results grid-4">${box(2)}${box(2)}${box(2)}${box(2)}</div></div>
+        </div>`);
+    }
+    container.style.cssText = 'display:flex;flex-direction:column;gap:24px;';
+    container.innerHTML = frag.join('');
+}
+
+/* ============================================================
+   5. LÀM CẦU
+   ============================================================ */
+let activeCauBox = null;
+
+function toggleCau(cb){
+    document.getElementById('app-wrapper').classList.toggle('cau-on', cb.checked);
+    if(!cb.checked) closeCauModal();
+}
+
+function bindCauClicks(){
+    document.getElementById('boards-feed-container').addEventListener('click', function(e){
+        if(!document.getElementById('toggle-cau').checked) return;
+        const box = e.target.closest('.number-box');
+        if(!box) return;
+        if(e.target.closest('.mask-cover')) return;       // không mở cầu khi đang chạm lớp che ĐB
+        const numText = box.querySelector('.number-text');
+        if(!numText || numText.querySelector('.dot')) return;  // chưa có số (đang chờ quay)
+        activeCauBox = box;
+        openCauModal(numText);
+    });
+}
+
+function openCauModal(numText){
+    const digits = numText.querySelectorAll('.digit');
+    if(!digits.length) return;
+    document.getElementById('cau-modal-num').textContent = numText.textContent.trim();
+    const cont = document.getElementById('cau-modal-digits');
+    cont.innerHTML = '';
+    digits.forEach(span => {
+        const btn = document.createElement('button');
+        btn.className = 'cau-btn-digit' + (span.classList.contains('active-cau') ? ' selected' : '');
+        btn.textContent = span.textContent;
+        btn.onclick = () => { btn.classList.toggle('selected'); span.classList.toggle('active-cau'); };
+        cont.appendChild(btn);
+    });
+    document.getElementById('cau-modal').classList.add('show');
+}
+function closeCauModal(e){
+    if(e) e.preventDefault();
+    document.getElementById('cau-modal').classList.remove('show');
+    activeCauBox = null;
+}
+
+/* ============================================================
+   6. LẶN SỐ ĐB (mới)
+   ============================================================ */
+function toggleMask(cb){
+    const wrap = document.getElementById('app-wrapper');
+    wrap.classList.toggle('masking', cb.checked);
+    if(!cb.checked) document.querySelectorAll('.row-db .number-box.revealed').forEach(b=>b.classList.remove('revealed'));
+}
+
+/* ============================================================
+   7. BÀN PHÍM ẢO + TÌM KIẾM
+   ============================================================ */
+const searchInput = document.getElementById('ai-search-input');
+const keyboardWrapper = document.getElementById('keyboard-wrapper');
+function showKeyboard(){ keyboardWrapper.style.display='block'; keyboardWrapper.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+function hideKeyboard(){ keyboardWrapper.style.display='none'; }
+function setupKeyboard(){
+    document.querySelectorAll('#virtual-keyboard .vk-btn[data-val]').forEach(k=>{
+        k.addEventListener('click', e=>{
+            let cur = searchInput.value.replace(/\s/g,'');
+            if(cur.length<10){ cur += e.target.getAttribute('data-val'); formatInput(cur); }
+        });
+    });
+}
+function clearInput(){ searchInput.value=''; clearSearchHits(); }
+function delInput(){ let cur=searchInput.value.replace(/\s/g,''); if(cur.length){ formatInput(cur.slice(0,-1)); } }
+function formatInput(raw){ searchInput.value = raw.match(/.{1,2}/g)?.join(' ') || ''; }
+
+function clearSearchHits(){
+    document.querySelectorAll('.search-hit').forEach(el=>el.classList.remove('search-hit'));
+}
+
+/* Tìm: highlight lô trong ma trận + báo thống kê thật trên màn AI */
+function runSearch(){
+    const raw = searchInput.value.replace(/\s/g,'');
+    const pairs = [...new Set(raw.match(/.{2}/g) || [])];
+    clearSearchHits();
+    if(!pairs.length){ flashTV('blue','⚠️ Hãy nhập ít nhất 1 cặp số (2 chữ số) để tra cứu.'); return; }
+
+    let report = [];
+    pairs.forEach(p=>{
+        const tr = document.querySelector(`#matrix-body tr[data-lo="${p}"]`);
+        if(tr){
+            tr.querySelector('th').classList.add('search-hit');
+            tr.querySelectorAll('td').forEach(td=>td.classList.add('search-hit'));
+            const lo = parseInt(p,10);
+            report.push(`Lô <b>${p}</b>: về <b>${LottoData.totals[lo]}</b> lần / 30 ngày · gan hiện tại <b>${LottoData.gan[lo]}</b> ngày`);
+            if(pairs.length===1) tr.scrollIntoView({behavior:'smooth',block:'center'});
+        }
+    });
+    tvScreen.className='tv-screen theme-blue';
+    tvHeader.textContent='🔎 Tra cứu tần suất lô';
+    sliderTrack.style.transform='translateX(-50%)';
+    tvResults.innerHTML='';
+    tvMessage.innerHTML = report.length ? report.join('<br>') : '⚠️ Không tìm thấy dữ liệu.';
+}
+
+/* ============================================================
+   8. MÀN HÌNH AI (Ghép Xiên / Bạc Nhớ / Nhịp Đẹp)
+   ============================================================ */
+const sliderTrack = document.getElementById('main-slider-track');
+const tvScreen    = document.getElementById('ai-tv-screen');
+const tvHeader    = document.getElementById('tv-header-title');
+const tvMessage   = document.getElementById('tv-message');
+const tvResults   = document.getElementById('tv-results-container');
+
+function closeTV(){ sliderTrack.style.transform='translateX(0)'; }
+function flashTV(theme,msg){ tvScreen.className='tv-screen theme-'+theme; sliderTrack.style.transform='translateX(-50%)'; tvResults.innerHTML=''; tvMessage.innerHTML=msg; }
+function getPairs(){ return [...new Set((searchInput.value.replace(/\s/g,'').match(/.{2}/g)) || [])]; }
+function spawnBadge(html, delay){ setTimeout(()=>{ const b=document.createElement('div'); b.className='xien-badge'; b.innerHTML=html; tvResults.appendChild(b); }, delay); }
+
+function activateXienAI(){
+    hideKeyboard();
+    const pairs = getPairs();
+    if(pairs.length<2){ flashTV('blue','⚠️ Cần ít nhất 2 cặp khác nhau (4 chữ số) để ghép xiên.'); return; }
+    flashTV('blue', `✅ Ghép ${pairs.length} cặp [${pairs.join(', ')}] thành các xiên 2:`);
+    tvHeader.textContent='🔗 Hệ thống ghép xiên AI';
+    let k=0;
+    for(let i=0;i<pairs.length-1;i++)
+        for(let j=i+1;j<pairs.length;j++)
+            spawnBadge(`${pairs[i]} – ${pairs[j]}`, (k++)*140);
+}
+
+function activateBacNhoAI(){
+    hideKeyboard();
+    const pairs = getPairs();
+    if(!pairs.length){ flashTV('red','⚠️ Nhập ít nhất 1 cặp để tra Bạc Nhớ.'); return; }
+    flashTV('red', `🧠 <b>Cơ sở dữ liệu thống kê</b><br>Sau khi [${pairs.join(', ')}] về, cặp thường theo sau:`);
+    tvHeader.textContent='🚨 Hệ thống Bạc Nhớ AI';
+    const db = { "00":"99","99":"00","12":"34 – 43","21":"45 – 54","68":"86","86":"68","79":"97","97":"79" };
+    pairs.forEach((p,i)=>{
+        // nếu không có trong bảng, suy ra "lộn" và "kép" liên quan -> ổn định, không random
+        const rev = p[1]+p[0];
+        const res = db[p] || `${rev} – ${p[0]}${p[0]}`;
+        spawnBadge(`<span style="font-size:11px;opacity:.8;font-weight:500;">Cầu ${p} ➔ theo sau:</span><br>${res}`, i*200);
+    });
+}
+
+function activateNhipDep(){
+    hideKeyboard();
+    flashTV('green','📈 <b>Nhịp đẹp đang chạy</b> – các lô có nhịp về đều & đang nóng:');
+    tvHeader.textContent='📈 Bộ lọc Nhịp Đẹp AI';
+    // "nhịp đẹp": lô có tổng về cao nhưng gan vừa phải (1..4 ngày) -> sắp tới chu kỳ
+    const cand = LottoData.totals
+        .map((t,lo)=>({lo:pad2(lo), t, g:LottoData.gan[lo]}))
+        .filter(x => x.g>=1 && x.g<=4)
+        .sort((a,b)=> b.t-a.t)
+        .slice(0,6);
+    if(!cand.length){ tvMessage.innerHTML='Chưa có lô nào vào nhịp đẹp hôm nay.'; return; }
+    cand.forEach((x,i)=> spawnBadge(`${x.lo}<br><span style="font-size:10px;opacity:.8;font-weight:500;">về ${x.t}× · gan ${x.g}n</span>`, i*160));
+}
+
+/* ============================================================
+   9. QUAY THỬ TRỰC TIẾP
+   ============================================================ */
+async function triggerQuayThu(cb){
+    if(cb.checked){
+        cb.disabled = true;
+        await startSimulation();
+        cb.checked = false;
+        cb.disabled = false;
+    }
+}
+
+async function startSimulation(){
+    const status = document.getElementById('live-status');
+    const dropZone = document.getElementById('loto-drop-zone');
+    const slotTitle = document.getElementById('slot-title');
+    status.textContent = "🔴 Đang quay số..."; status.style.color = "var(--db-bg)";
+    dropZone.innerHTML = ''; slotTitle.textContent = "⚡ Hệ thống đang lấy kết quả...";
+
+    // reset các ô về trạng thái chờ
+    document.querySelectorAll('#board-live .number-text').forEach(box=>{
+        const len = box.closest('.row').dataset.len;
+        let dots=''; for(let i=0;i<len;i++) dots+='<span class="dot"></span>';
+        box.innerHTML = `<div class="dots-wrapper">${dots}</div>`;
+    });
+
+    // thứ tự quay thực tế: G1 -> ... -> G7 -> ĐB (ĐB quay cuối dù hiển thị trên cùng)
+    const order = ['G1','G2','G3','G4','G5','G6','G7','ĐB'];
+    const rows = Array.from(document.querySelectorAll('#board-live .row'));
+    const msgs = ["gan cực đại!","rơi liên tiếp 3 ngày!","ra cả cặp rất đẹp!","vào nhịp rơi ổn định!","xuất hiện đúng cầu chạy!"];
+
+    for(const name of order){
+        const row = rows.find(r => r.dataset.prize === name);
+        if(!row) continue;
+        const len = parseInt(row.dataset.len);
+        const label = row.querySelector('.prize-name');
+        const boxes = row.querySelectorAll('.number-text');
+        label.classList.add('active-led');
+        for(const box of boxes){
+            box.classList.add('spinning');
+            const spin = setInterval(()=>{ box.textContent = generateRandom(len); }, 50);
+            await sleep(900);
+            clearInterval(spin);
+            box.classList.remove('spinning');
+            const final = generateRandom(len);
+            box.innerHTML = wrapDigits(final);
+            const lo = final.slice(-2);
+            const chip = document.createElement('div');
+            chip.className='lo-chip'; chip.textContent = lo; dropZone.appendChild(chip);
+            const m = msgs[Math.floor(Math.random()*msgs.length)];
+            slotTitle.textContent = `🔥 Lô ${lo} ${m} (${name})`;
+            slotTitle.classList.add('flash'); setTimeout(()=>slotTitle.classList.remove('flash'),500);
+            await sleep(150);
+        }
+        label.classList.remove('active-led');
+    }
+    status.textContent = "✅ Đã quay xong"; status.style.color = "var(--led-color)";
+    slotTitle.textContent = "Kỳ quay kết thúc · Bật 'Làm Cầu' để chấm cầu các giải.";
+}
+</script>
+</body>
+</html>

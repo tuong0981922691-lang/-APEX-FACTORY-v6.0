@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Không gian XSMN - 100 bảng kết quả</title>
+  <style>
+    :root{
+      --bg:#121212; --panel:#1b1510; --panel-2:#241a12; --card:#1f2937;
+      --brown:#3a2618; --brown-2:#5a3822; --gold:#f6c65b; --red:#d40000;
+      --text:#fff7ed; --muted:#b8a99a; --line:rgba(255,255,255,.12);
+      --ok:#10b981; --warn:#f59e0b; --blue:#38bdf8;
+      --radius:16px; --shadow:0 14px 36px rgba(0,0,0,.42);
+      --safe-bottom:env(safe-area-inset-bottom);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;scrollbar-width:none}
+    *::-webkit-scrollbar{display:none}
+    html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{display:flex;justify-content:center;align-items:stretch}
+    .app{width:100%;max-width:480px;height:100%;background:linear-gradient(180deg,#15100d 0%,#0f0b09 100%);position:relative;overflow:hidden;box-shadow:0 0 48px rgba(0,0,0,.85);display:flex;flex-direction:column}
+    .topbar{padding:calc(12px + env(safe-area-inset-top)) 14px 10px;background:linear-gradient(135deg,#4a160f 0%,#2b1a10 52%,#17100c 100%);border-bottom:1px solid rgba(246,198,91,.25);box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:5;flex-shrink:0}
+    .brand-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .brand{min-width:0}.brand h1{font-size:16px;line-height:1.15;font-weight:1000;letter-spacing:.4px;text-transform:uppercase;color:#fff}.brand p{font-size:11px;color:var(--muted);font-weight:700;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .clock{flex-shrink:0;text-align:right;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:7px 9px}.clock-main{font-size:14px;font-weight:1000;color:var(--gold);font-variant-numeric:tabular-nums}.clock-sub{font-size:9px;color:var(--muted);font-weight:900;text-transform:uppercase}
+    .status-card{margin-top:11px;border:1px solid rgba(246,198,91,.22);background:linear-gradient(135deg,rgba(90,56,34,.72),rgba(20,14,10,.72));border-radius:14px;padding:11px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+    .status-line{display:flex;align-items:center;justify-content:space-between;gap:10px}.status-title{font-size:12px;font-weight:1000;text-transform:uppercase;color:#fff}.status-pill{font-size:10px;font-weight:1000;border-radius:999px;padding:5px 8px;background:#2b1a10;border:1px solid var(--line);color:var(--gold);white-space:nowrap}.stations-today{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}.station-chip{font-size:11px;font-weight:900;background:rgba(0,0,0,.24);border:1px solid rgba(246,198,91,.2);color:#ffe5ad;border-radius:999px;padding:5px 8px}.countdown{margin-top:8px;font-size:11px;color:var(--muted);font-weight:800;line-height:1.45}.countdown b{color:#fff}
+    .tools{display:flex;gap:8px;padding:10px 12px;background:rgba(18,18,18,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);z-index:4;flex-shrink:0}.tool-btn{flex:1;border:1px solid rgba(246,198,91,.22);background:linear-gradient(145deg,#2a1b12,#15100d);color:#ffe7b0;border-radius:12px;padding:10px 8px;font-size:11px;font-weight:1000;text-transform:uppercase;cursor:pointer}.tool-btn.active{background:linear-gradient(145deg,#9b1c1c,#d40000);color:#fff;border-color:#ff7b7b;box-shadow:0 0 18px rgba(212,0,0,.28)}
+    .content{flex:1;overflow-y:auto;overflow-x:hidden;padding:12px 10px calc(18px + var(--safe-bottom));scroll-behavior:smooth}.section{display:none}.section.active{display:block}.schedule-grid{display:grid;gap:10px}.day-card{border:1px solid rgba(246,198,91,.18);border-radius:15px;background:linear-gradient(145deg,rgba(42,27,18,.86),rgba(20,14,10,.92));padding:11px;box-shadow:var(--shadow)}.day-card.today{border-color:#facc15;box-shadow:0 0 0 1px rgba(250,204,21,.18),0 12px 30px rgba(0,0,0,.45)}.day-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}.day-name{font-size:13px;font-weight:1000;text-transform:uppercase;color:#fff}.day-time{font-size:11px;color:var(--gold);font-weight:1000}.day-stations{display:flex;gap:6px;flex-wrap:wrap}
+    .board-list{display:flex;flex-direction:column;gap:14px}.board{border-radius:var(--radius);overflow:hidden;background:linear-gradient(145deg,rgba(31,41,55,.7),rgba(28,18,12,.96));border:1px solid rgba(255,255,255,.09);box-shadow:var(--shadow)}.board-header{padding:12px;background:linear-gradient(135deg,#5a160e,#321c10 55%,#18110c);border-bottom:1px solid rgba(246,198,91,.18)}.board-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.board-title{font-size:14px;font-weight:1000;text-transform:uppercase;color:#fff}.board-date{font-size:10px;color:#ffe0a0;font-weight:900;text-align:right;line-height:1.35}.board-meta{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}.meta-chip{font-size:10px;font-weight:900;color:#d8c5b2;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:4px 7px}.result-wrap{overflow-x:auto;background:#100d0b}.result-table{width:100%;min-width:390px;border-collapse:separate;border-spacing:0;table-layout:fixed}.result-table th,.result-table td{border-right:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);padding:8px 6px;text-align:center;vertical-align:middle}.result-table th{background:#21150f;color:#ffe0a0;font-size:11px;font-weight:1000;text-transform:uppercase}.result-table th.prize{position:sticky;left:0;z-index:2;width:44px;background:#33180f;color:#fff}.result-table td.prize-name{position:sticky;left:0;z-index:1;background:#21150f;color:#d8c5b2;font-size:12px;font-weight:1000;width:44px}.num-cell{min-height:29px;display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;color:#fff;font-size:13px;font-weight:900;letter-spacing:.5px}.empty{color:#6b5b4c;font-weight:800}.db-row td{background:rgba(212,0,0,.08)}.db-row .num-cell{font-size:17px;color:#ffdddd}.g4 .num-cell{font-size:11px;line-height:1.65}.note{padding:9px 12px;font-size:10px;color:var(--muted);line-height:1.45;background:rgba(0,0,0,.14);border-top:1px solid rgba(255,255,255,.06)}
+    .floating-top{position:absolute;right:12px;bottom:calc(14px + var(--safe-bottom));z-index:8;border:1px solid rgba(246,198,91,.3);background:linear-gradient(145deg,#6b2218,#d40000);color:#fff;border-radius:999px;width:42px;height:42px;font-weight:1000;box-shadow:0 10px 25px rgba(0,0,0,.45);cursor:pointer}.debug{display:none}.small-warning{font-size:10px;color:#d6c7b8;line-height:1.45;margin-top:7px}.small-warning strong{color:#f6c65b}
+    @media (max-width:390px){.brand h1{font-size:14px}.tool-btn{font-size:10px;padding:9px 6px}.result-table{min-width:360px}.result-table th,.result-table td{padding:7px 4px}.station-chip{font-size:10px}.board-title{font-size:13px}}
+  </style>
+</head>
+<body>
+  <main class="app" id="app">
+    <header class="topbar">
+      <div class="brand-row">
+        <div class="brand">
+          <h1>Kết quả xổ số miền Nam</h1>
+          <p>100 bảng gọn - giữ giao diện bảng, bỏ toàn bộ AI/scan/hub</p>
+        </div>
+        <div class="clock" aria-label="Đồng hồ Việt Nam">
+          <div class="clock-main" id="clock-main">--:--:--</div>
+          <div class="clock-sub" id="clock-sub">Việt Nam</div>
+        </div>
+      </div>
+      <section class="status-card">
+        <div class="status-line">
+          <div class="status-title" id="today-title">Lịch hôm nay</div>
+          <div class="status-pill" id="live-status">Đang tính...</div>
+        </div>
+        <div class="stations-today" id="stations-today"></div>
+        <div class="countdown" id="countdown-text">Đồng hồ dùng múi giờ Asia/Ho_Chi_Minh.</div>
+        <div class="small-warning"><strong>Khóa chống ảo giác:</strong> file này không tự bịa kết quả. Ô kết quả để trống cho tới khi bạn nối API hợp lệ hoặc nhập dữ liệu thật.</div>
+      </section>
+    </header>
+
+    <nav class="tools" aria-label="Điều hướng">
+      <button class="tool-btn active" data-tab="boards">100 bảng XSMN</button>
+      <button class="tool-btn" data-tab="schedule">Lịch quay tuần</button>
+      <button class="tool-btn" onclick="scrollToToday()">Về hôm nay</button>
+    </nav>
+
+    <section class="content" id="content">
+      <div class="section active" id="section-boards"><div class="board-list" id="board-list"></div></div>
+      <div class="section" id="section-schedule"><div class="schedule-grid" id="schedule-grid"></div></div>
+    </section>
+    <button class="floating-top" onclick="document.getElementById('content').scrollTo({top:0,behavior:'smooth'})">↑</button>
+  </main>
+
+  <script>
+    const DRAW = Object.freeze({ prepHour:16, prepMinute:10, drawHour:16, drawMinute:15, endHour:16, endMinute:40 });
+    const XSMN_SCHEDULE = Object.freeze({
+      0:{label:'Chủ nhật', stations:['Tiền Giang','Kiên Giang','Đà Lạt']},
+      1:{label:'Thứ hai', stations:['TP. HCM','Đồng Tháp','Cà Mau']},
+      2:{label:'Thứ ba', stations:['Bến Tre','Vũng Tàu','Bạc Liêu']},
+      3:{label:'Thứ tư', stations:['Đồng Nai','Cần Thơ','Sóc Trăng']},
+      4:{label:'Thứ năm', stations:['Tây Ninh','An Giang','Bình Thuận']},
+      5:{label:'Thứ sáu', stations:['Vĩnh Long','Bình Dương','Trà Vinh']},
+      6:{label:'Thứ bảy', stations:['TP. HCM','Long An','Bình Phước','Hậu Giang']}
+    });
+    const PRIZES = [
+      {name:'G8', lines:1}, {name:'G7', lines:1}, {name:'G6', lines:3}, {name:'G5', lines:1},
+      {name:'G4', lines:7, cls:'g4'}, {name:'G3', lines:2}, {name:'G2', lines:1}, {name:'G1', lines:1}, {name:'ĐB', lines:1, cls:'db-row'}
+    ];
+    const VN_DATE = new Intl.DateTimeFormat('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',weekday:'long',year:'numeric',month:'2-digit',day:'2-digit'});
+    const VN_TIME = new Intl.DateTimeFormat('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+    function getVNNow(){ return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Ho_Chi_Minh'})); }
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function chip(text){ return `<span class="station-chip">${text}</span>`; }
+    function safeText(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    function makeEmptyCell(lines){ let html=''; for(let i=0;i<lines;i++){ html += `<div class="empty">—</div>`; } return `<div class="num-cell">${html}</div>`; }
+    function formatDate(d){ return VN_DATE.format(d); }
+    function boardDateFromOffset(offset){ const d = getVNNow(); d.setHours(12,0,0,0); d.setDate(d.getDate()-offset); return d; }
+    function renderBoard(offset){
+      const d = boardDateFromOffset(offset); const day = d.getDay(); const item = XSMN_SCHEDULE[day];
+      const columns = item.stations.map(st=>`<th>${safeText(st)}</th>`).join('');
+      const rows = PRIZES.map(p=>{
+        const cells = item.stations.map(()=>`<td>${makeEmptyCell(p.lines)}</td>`).join('');
+        return `<tr class="${p.cls||''}"><td class="prize-name">${p.name}</td>${cells}</tr>`;
+      }).join('');
+      const todayMark = offset===0 ? ' id="today-board"' : '';
+      return `<article class="board"${todayMark}>
+        <div class="board-header">
+          <div class="board-title-row">
+            <div class="board-title">Bảng XSMN #${offset+1}</div>
+            <div class="board-date">${formatDate(d)}</div>
+          </div>
+          <div class="board-meta"><span class="meta-chip">${item.label}</span><span class="meta-chip">Mở phòng 16:10</span><span class="meta-chip">Quay chính 16:15</span><span class="meta-chip">${item.stations.length} đài</span></div>
+        </div>
+        <div class="result-wrap"><table class="result-table"><thead><tr><th class="prize">Giải</th>${columns}</tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="note">Bảng chỉ là khung giao diện kết quả. Không sinh số ngẫu nhiên, không dự đoán, không thay thế nguồn kết quả chính thức.</div>
+      </article>`;
+    }
+    function renderBoards(){ document.getElementById('board-list').innerHTML = Array.from({length:100},(_,i)=>renderBoard(i)).join(''); }
+    function renderSchedule(){
+      const today = getVNNow().getDay();
+      const order = [1,2,3,4,5,6,0];
+      document.getElementById('schedule-grid').innerHTML = order.map(day=>{
+        const item = XSMN_SCHEDULE[day];
+        return `<article class="day-card ${day===today?'today':''}"><div class="day-head"><div class="day-name">${item.label}</div><div class="day-time">16:10 chuẩn bị · 16:15 quay</div></div><div class="day-stations">${item.stations.map(chip).join('')}</div></article>`;
+      }).join('');
+    }
+    function updateClockAndStatus(){
+      const vn = getVNNow(); const day = vn.getDay(); const item = XSMN_SCHEDULE[day];
+      document.getElementById('clock-main').textContent = VN_TIME.format(new Date());
+      document.getElementById('clock-sub').textContent = `${item.label} · VN`;
+      document.getElementById('today-title').textContent = `Lịch hôm nay - ${item.label}`;
+      document.getElementById('stations-today').innerHTML = item.stations.map(chip).join('');
+      const prep = new Date(vn); prep.setHours(DRAW.prepHour,DRAW.prepMinute,0,0);
+      const draw = new Date(vn); draw.setHours(DRAW.drawHour,DRAW.drawMinute,0,0);
+      const end = new Date(vn); end.setHours(DRAW.endHour,DRAW.endMinute,0,0);
+      const nextPrep = new Date(prep); if(vn >= end) nextPrep.setDate(nextPrep.getDate()+1);
+      let status='', color='', target=null, targetLabel='';
+      if(vn < prep){ status='CHỜ MỞ PHÒNG'; color='var(--gold)'; target=prep; targetLabel='mở phòng 16:10'; }
+      else if(vn >= prep && vn < draw){ status='CHUẨN BỊ QUAY'; color='var(--warn)'; target=draw; targetLabel='quay chính 16:15'; }
+      else if(vn >= draw && vn < end){ status='ĐANG TRONG KHUNG QUAY'; color='var(--ok)'; target=end; targetLabel='kết thúc khung 16:40'; }
+      else { status='ĐÃ QUA KHUNG QUAY'; color='var(--muted)'; target=nextPrep; targetLabel='mở phòng kỳ tiếp theo'; }
+      const pill = document.getElementById('live-status'); pill.textContent=status; pill.style.color=color; pill.style.borderColor=color;
+      const ms = Math.max(0, target - vn); const h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000), s=Math.floor((ms%60000)/1000);
+      document.getElementById('countdown-text').innerHTML = `Mốc thời gian: <b>16:10 mở phòng</b> · <b>16:15 quay chính</b> · <b>16:40 hết khung theo dõi</b>. Còn <b>${pad(h)}:${pad(m)}:${pad(s)}</b> tới ${targetLabel}.`;
+    }
+    function bindTabs(){ document.querySelectorAll('.tool-btn[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll('.tool-btn[data-tab]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.section').forEach(s=>s.classList.remove('active')); document.getElementById(`section-${btn.dataset.tab}`).classList.add('active'); document.getElementById('content').scrollTo({top:0,behavior:'smooth'}); })); }
+    function scrollToToday(){ document.querySelectorAll('.section').forEach(s=>s.classList.remove('active')); document.getElementById('section-boards').classList.add('active'); document.querySelectorAll('.tool-btn[data-tab]').forEach(b=>b.classList.toggle('active', b.dataset.tab==='boards')); const el=document.getElementById('today-board'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+    document.addEventListener('DOMContentLoaded',()=>{ renderBoards(); renderSchedule(); bindTabs(); updateClockAndStatus(); setInterval(updateClockAndStatus,1000); });
+  </script>
+</body>
+</html>

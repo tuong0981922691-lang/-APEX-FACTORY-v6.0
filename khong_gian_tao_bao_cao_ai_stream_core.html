@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Không Gian Tạo Báo Cáo AI - Stream Core</title>
+<style>
+:root{
+    --bg-main:#1c130d;
+    --bg-board:#2a1a10;
+    --bg-deep:#120a06;
+    --panel:#24150d;
+    --panel-2:#160d08;
+    --panel-3:#3a2416;
+    --text-main:#fff4e6;
+    --text-soft:#ffe0b8;
+    --text-muted:#c9a982;
+    --border-color:#5a3824;
+    --glass-border:#6b432b;
+    --accent:#d40000;
+    --accent-bright:#ff3838;
+    --ok:#10b981;
+    --warn:#facc15;
+    --bad:#ef4444;
+    --blue:#38bdf8;
+    --violet:#a78bfa;
+    --font-ui:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono","Cascadia Code","Roboto Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;font-family:var(--font-ui);-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{width:100vw;height:100dvh;overflow:hidden;background:#050302;color:var(--text-main);display:flex;justify-content:center;align-items:flex-start}
+button,input,textarea,select{font:inherit}
+button{touch-action:manipulation}
+.app-wrapper{max-width:480px;width:100%;height:100%;overflow:hidden;background:var(--bg-main);box-shadow:0 0 45px rgba(0,0,0,.95);border-left:1px solid rgba(255,232,190,.08);border-right:1px solid rgba(255,232,190,.08)}
+.report-space{height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,var(--bg-board),var(--bg-deep));padding-top:env(safe-area-inset-top)}
+.topbar{flex-shrink:0;display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:10px 12px;background:linear-gradient(180deg,#2b1a10,#120a06);border-bottom:1px solid var(--border-color);box-shadow:0 4px 14px rgba(0,0,0,.32);z-index:20}
+.back-btn{width:38px;height:34px;border:none;border-radius:12px;background:linear-gradient(180deg,#3a2416,#211208);border:1px solid var(--glass-border);color:var(--text-soft);font-size:20px;font-weight:900;cursor:pointer;box-shadow:inset 0 1px 2px rgba(255,232,190,.08),0 3px 8px rgba(0,0,0,.25)}
+.back-btn:active{transform:scale(.94)}
+.top-title{font-weight:950;font-size:14px;color:var(--text-soft);letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+.header-chip{font-size:10px;font-weight:950;color:#ffd6a0;border:1px solid rgba(255,210,150,.18);background:rgba(255,220,170,.06);border-radius:999px;padding:6px 8px;white-space:nowrap}
+.scroll-area{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:14px 12px 16px;display:flex;flex-direction:column;gap:14px}
+.scroll-area::-webkit-scrollbar{display:none;width:0;height:0}
+.hero{border:1px solid rgba(255,232,190,.10);background:radial-gradient(circle at 20% 0%,rgba(212,0,0,.20),transparent 34%),linear-gradient(180deg,#24150d,#160d08);border-radius:18px;padding:14px;box-shadow:0 10px 24px rgba(0,0,0,.28)}
+.hero-kicker{font-size:11px;font-weight:950;color:var(--warn);letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px}
+.hero-title{font-size:20px;font-weight:1000;line-height:1.15;color:var(--text-main);margin-bottom:8px}
+.hero-desc{font-size:12px;line-height:1.45;color:var(--text-muted);font-weight:750}
+.core-panel{border:1px solid rgba(56,189,248,.22);background:linear-gradient(180deg,rgba(56,189,248,.08),rgba(18,10,6,.90));border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.core-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.core-title{font-size:13px;font-weight:950;color:#bdeaff;text-transform:uppercase;letter-spacing:.4px}
+.core-status{font-size:10px;font-weight:950;border-radius:999px;padding:5px 8px;color:var(--blue);background:rgba(56,189,248,.10);border:1px solid rgba(56,189,248,.35);white-space:nowrap}
+.core-status.loading{color:var(--warn);background:rgba(250,204,21,.10);border-color:rgba(250,204,21,.35)}
+.core-status.ready{color:var(--ok);background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.35)}
+.core-status.error{color:var(--bad);background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.35)}
+.progress-shell{height:8px;border-radius:999px;overflow:hidden;background:rgba(0,0,0,.28);border:1px solid rgba(255,232,190,.08)}
+.progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#d40000,#ffbc5e,#10b981);transition:width .18s ease}
+.core-log{font-family:var(--mono);font-size:10.5px;line-height:1.35;color:var(--text-muted);background:rgba(0,0,0,.16);border:1px dashed rgba(255,232,190,.11);border-radius:12px;padding:9px;min-height:42px;white-space:pre-wrap}
+.scan-panel{border:1px solid rgba(250,204,21,.24);background:linear-gradient(180deg,rgba(250,204,21,.10),rgba(33,18,8,.92));border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.panel-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:950;color:#ffd6a0;text-transform:uppercase;letter-spacing:.4px}
+.status-pill{font-size:10px;font-weight:950;border-radius:999px;padding:5px 8px;color:var(--warn);background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.35);white-space:nowrap}
+.status-pill.ok{color:var(--ok);background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.35)}
+.status-pill.bad{color:var(--bad);background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.35)}
+.file-list{display:flex;flex-direction:column;gap:8px}
+.file-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:rgba(18,10,6,.55);border:1px solid rgba(255,232,190,.08);border-radius:12px;padding:9px 10px}
+.file-name{font-size:12px;color:var(--text-main);font-weight:850;line-height:1.25;word-break:break-word}
+.file-state{font-size:10px;font-weight:950;color:var(--warn);white-space:nowrap}
+.file-state.ok{color:var(--ok)}
+.file-state.bad{color:var(--bad)}
+.notice{font-size:11px;line-height:1.45;color:var(--text-muted);font-weight:760;background:rgba(0,0,0,.14);border-radius:12px;padding:9px;border:1px dashed rgba(255,232,190,.12)}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px}
+.section-title{font-size:13px;font-weight:950;color:#ffd6a0;text-transform:uppercase;letter-spacing:.6px}
+.section-sub{font-size:11px;color:var(--text-muted);font-weight:800}
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.report-card{min-height:122px;border:none;text-align:left;border-radius:16px;padding:12px;background:linear-gradient(180deg,rgba(58,36,22,.92),rgba(33,18,8,.98));border:1px solid rgba(255,232,190,.10);box-shadow:0 5px 14px rgba(0,0,0,.22);cursor:pointer;color:var(--text-main);display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+.report-card::before{content:"";position:absolute;inset:auto -30px -45px auto;width:100px;height:100px;border-radius:50%;background:rgba(212,0,0,.13)}
+.report-card:active{transform:scale(.985)}
+.report-card.active{border-color:var(--accent-bright);box-shadow:0 0 0 1px rgba(255,56,56,.25),0 8px 20px rgba(0,0,0,.32)}
+.report-card:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.icon{width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(212,0,0,.16);border:1px solid rgba(255,56,56,.25);font-size:18px;flex-shrink:0}
+.card-title{font-size:14px;font-weight:950;line-height:1.16;color:var(--text-main);position:relative;z-index:1}
+.card-desc{font-size:11px;line-height:1.35;color:var(--text-muted);font-weight:730;position:relative;z-index:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.full-width{grid-column:1/-1;min-height:104px}
+.builder{border-radius:18px;border:1px solid rgba(255,232,190,.10);background:linear-gradient(180deg,#24150d,#160d08);padding:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 20px rgba(0,0,0,.24)}
+.field-label{font-size:11px;color:#ffd6a0;font-weight:950;text-transform:uppercase;letter-spacing:.45px}
+.report-input,.report-textarea{width:100%;border:1px solid rgba(255,232,190,.14);border-radius:13px;background:#120a06;color:var(--text-main);outline:none;padding:10px 11px;font-size:12px;font-weight:760;line-height:1.4}
+.report-textarea{height:92px;resize:none}
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.action-btn{border:none;border-radius:14px;padding:11px 10px;font-size:12px;font-weight:950;cursor:pointer;color:#fff;background:linear-gradient(135deg,#d40000,#ff3838);box-shadow:0 7px 16px rgba(212,0,0,.22)}
+.action-btn.secondary{background:linear-gradient(180deg,#3a2416,#211208);border:1px solid var(--glass-border);color:var(--text-soft);box-shadow:0 5px 12px rgba(0,0,0,.22)}
+.action-btn:active{transform:scale(.97)}
+.action-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.preview{border:1px solid rgba(16,185,129,.28);background:linear-gradient(180deg,rgba(16,185,129,.09),rgba(18,10,6,.88));border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.preview-title{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--ok);font-weight:950;text-transform:uppercase;letter-spacing:.4px}
+.preview-meter{font-size:10px;color:var(--text-muted);font-weight:850;text-transform:none;letter-spacing:0;white-space:nowrap}
+.preview-box{height:280px;overflow:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,232,190,.08);padding:10px}
+.preview-box::-webkit-scrollbar{display:none;width:0;height:0}
+.preview-body{font-family:var(--mono);font-size:11px;line-height:1.45;color:var(--text-main);font-weight:650;white-space:pre-wrap;word-break:break-word}
+.abc{display:grid;grid-template-columns:1fr;gap:9px}
+.abc-box{border-radius:14px;padding:10px;border:1px solid rgba(255,232,190,.10);background:rgba(18,10,6,.48)}
+.abc-box b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;color:#ffd6a0}
+.abc-box p{font-size:11px;line-height:1.42;color:var(--text-muted);font-weight:760}
+.footer-note{flex-shrink:0;background:linear-gradient(135deg,#2b1a10,#160d08);border-top:1px solid var(--border-color);padding:10px 14px calc(10px + env(safe-area-inset-bottom));font-size:11px;line-height:1.35;color:var(--text-muted);font-weight:800;text-align:center}
+.footer-note b{color:#ffd6a0}
+.lock-overlay{position:absolute;inset:0;background:rgba(5,3,2,.48);backdrop-filter:blur(2px);z-index:100;display:none;align-items:center;justify-content:center;padding:22px;text-align:center}
+.lock-overlay.show{display:flex}
+.lock-card{border-radius:18px;background:linear-gradient(180deg,#2b1a10,#120a06);border:1px solid rgba(255,232,190,.16);box-shadow:0 18px 48px rgba(0,0,0,.5);padding:16px;max-width:330px;width:100%}
+.spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(255,232,190,.16);border-top-color:var(--warn);margin:0 auto 10px;animation:spin .8s linear infinite}
+.lock-title{font-size:14px;font-weight:950;color:#ffd6a0;margin-bottom:6px;text-transform:uppercase}
+.lock-text{font-size:12px;line-height:1.4;color:var(--text-muted);font-weight:760}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:380px){.topbar{grid-template-columns:36px 1fr auto;padding:9px 10px}.back-btn{width:36px;height:32px}.top-title{font-size:13px}.header-chip{font-size:9px;padding:5px 7px}.scroll-area{padding:12px 10px}.hero-title{font-size:18px}.report-grid{gap:9px}.report-card{padding:10px;min-height:118px}.card-title{font-size:13px}.card-desc{font-size:10.5px}.action-row{grid-template-columns:1fr}.preview-box{height:250px}.footer-note{font-size:10.5px}}
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+    <main class="report-space" id="reportSpace">
+        <header class="topbar">
+            <button class="back-btn" type="button" aria-label="Trở về" id="backBtn">←</button>
+            <div class="top-title">Không gian tạo báo cáo AI</div>
+            <div class="header-chip">STREAM</div>
+        </header>
+
+        <section class="scroll-area" id="scrollArea">
+            <article class="hero">
+                <div class="hero-kicker">API Hook · Stream Output · Loading Lock</div>
+                <h1 class="hero-title">Tạo báo cáo kết nối lõi phân tích</h1>
+                <p class="hero-desc">Bản này đã nâng cấp để không còn hardcode chết: có cổng nhận dữ liệu từ lõi, cơ chế stream từng khối để tránh sập DOM và trạng thái chờ để khóa thao tác khi hệ thống đang xử lý.</p>
+            </article>
+
+            <section class="core-panel" aria-label="Trạng thái lõi phân tích">
+                <div class="core-row">
+                    <div class="core-title">Cổng lõi phân tích</div>
+                    <div class="core-status" id="coreStatus">CHỜ KẾT NỐI</div>
+                </div>
+                <div class="progress-shell"><div class="progress-bar" id="progressBar"></div></div>
+                <div class="core-log" id="coreLog">Bridge sẵn sàng: window.ReportWorkspaceBridge</div>
+            </section>
+
+            <section class="scan-panel" aria-label="Trạng thái quét tệp">
+                <div class="panel-title">
+                    <span>Quét tệp / nguồn</span>
+                    <span class="status-pill" id="scanStatus">Chưa có dữ liệu lõi</span>
+                </div>
+                <div class="file-list" id="fileList"></div>
+                <div class="notice" id="scanNotice">Danh sách nguồn bên dưới có thể được cập nhật động bằng API hook. Nếu lõi F12 hoặc hệ thống dữ liệu thật trả về nguồn mới, giao diện sẽ thay trạng thái ngay, không cần sửa HTML.</div>
+            </section>
+
+            <div class="section-head">
+                <div>
+                    <div class="section-title">Tạo báo cáo</div>
+                    <div class="section-sub">Chọn định dạng đầu ra</div>
+                </div>
+            </div>
+
+            <section class="report-grid" id="formatGrid">
+                <button class="report-card active" type="button" data-title="Tạo báo cáo của riêng bạn" data-template="Tạo báo cáo theo cấu trúc, phong cách, giọng điệu và tiêu chí kiểm chứng do người dùng chỉ định.">
+                    <div class="icon">✍️</div><div class="card-title">Tạo báo cáo của riêng bạn</div><div class="card-desc">Tạo báo cáo theo ý bạn bằng cấu trúc, phong cách, giọng điệu và tiêu chí kiểm chứng.</div>
+                </button>
+                <button class="report-card" type="button" data-title="Tài liệu tóm tắt" data-template="Tổng quan nguồn dữ liệu, các ý chính, trích dẫn, điểm chưa xác thực và cảnh báo thiếu dữ kiện.">
+                    <div class="icon">📄</div><div class="card-title">Tài liệu tóm tắt</div><div class="card-desc">Bản tổng quan về nguồn có trích dẫn, thông tin chính và điểm cần kiểm chứng.</div>
+                </button>
+                <button class="report-card" type="button" data-title="Hướng dẫn ôn tập" data-template="Tạo câu hỏi ngắn, câu hỏi tự luận, đáp án kiểm tra và bảng thuật ngữ từ tài liệu nguồn.">
+                    <div class="icon">🎓</div><div class="card-title">Hướng dẫn ôn tập</div><div class="card-desc">Câu hỏi ngắn, câu hỏi tiểu luận, đáp án và bảng thuật ngữ theo nguồn.</div>
+                </button>
+                <button class="report-card" type="button" data-title="Bài đăng trên blog" data-template="Chắt lọc ý chính thành bài viết dễ đọc, có tiêu đề, mở bài, thân bài, kết luận và cảnh báo dữ kiện.">
+                    <div class="icon">📰</div><div class="card-title">Bài đăng trên blog</div><div class="card-desc">Chuyển điểm chính thành bài viết dễ đọc, mạch lạc và có cấu trúc.</div>
+                </button>
+            </section>
+
+            <div class="section-head">
+                <div>
+                    <div class="section-title">Định dạng đề xuất</div>
+                    <div class="section-sub">Dành cho hệ thống nghiên cứu / quản trị / thuật toán</div>
+                </div>
+            </div>
+
+            <section class="report-grid">
+                <button class="report-card full-width" type="button" data-title="Tài liệu Đặc tả Kiến trúc" data-template="Mô tả cấu trúc hệ thống, module, luồng dữ liệu, lớp kiểm soát, cơ chế lỗi và ranh giới vận hành.">
+                    <div class="icon">🏗️</div><div class="card-title">Tài liệu Đặc tả Kiến trúc</div><div class="card-desc">Mô tả cấu trúc hệ thống, module lõi, luồng dữ liệu, lớp kiểm soát và cơ chế vận hành.</div>
+                </button>
+                <button class="report-card full-width" type="button" data-title="Báo cáo Chiến lược Quản trị" data-template="Phân tích rủi ro, kiểm soát lỗi, quyền truy cập, vùng dữ liệu nhạy cảm và cơ chế giám sát.">
+                    <div class="icon">🛡️</div><div class="card-title">Báo cáo Chiến lược Quản trị</div><div class="card-desc">Chiến lược quản trị rủi ro, kiểm soát lỗi, quyền truy cập và trách nhiệm vận hành.</div>
+                </button>
+                <button class="report-card full-width" type="button" data-title="Tài liệu Hướng dẫn Thuật toán" data-template="Giải thích thuật toán, dữ liệu đầu vào, quy tắc xử lý, giới hạn suy luận và điều kiện không đủ dữ liệu.">
+                    <div class="icon">🧮</div><div class="card-title">Tài liệu Hướng dẫn Thuật toán</div><div class="card-desc">Giải thích dữ liệu đầu vào, quy tắc xử lý, giới hạn và điều kiện không đủ dữ liệu.</div>
+                </button>
+                <button class="report-card full-width" type="button" data-title="Cẩm nang Tư duy Hệ thống" data-template="Mô hình xử lý thông tin đa tầng, phân biệt dữ liệu thật, giả định, suy luận và điểm mù.">
+                    <div class="icon">🧠</div><div class="card-title">Cẩm nang Tư duy Hệ thống</div><div class="card-desc">Mô hình xử lý thông tin đa tầng và cách phân biệt dữ liệu thực tế với suy luận.</div>
+                </button>
+            </section>
+
+            <section class="builder">
+                <label class="field-label" for="reportName">Tên báo cáo</label>
+                <input class="report-input" id="reportName" value="Báo cáo kiểm định nguồn dữ liệu và thiết kế không gian nghiên cứu" autocomplete="off">
+                <label class="field-label" for="reportRules">Yêu cầu kiểm soát</label>
+                <textarea class="report-textarea" id="reportRules">Không ảo giác. Không suy luận thay dữ liệu. Nếu thiếu dữ kiện phải ghi rõ Không có đủ dữ liệu xác thực. Áp dụng tam giác Tạo lập - Tự hủy diệt - Tái sinh.</textarea>
+                <div class="action-row">
+                    <button class="action-btn" type="button" id="buildBtn">Tạo báo cáo stream</button>
+                    <button class="action-btn secondary" type="button" id="resetBtn">Đặt lại</button>
+                </div>
+            </section>
+
+            <section class="preview" aria-live="polite">
+                <div class="preview-title"><span>Bản nháp báo cáo</span><span class="preview-meter" id="previewMeter">0 dòng</span></div>
+                <div class="preview-box" id="previewBox"><pre class="preview-body" id="previewBody">Chọn một định dạng báo cáo rồi bấm “Tạo báo cáo stream”.</pre></div>
+            </section>
+
+            <section class="abc">
+                <div class="abc-box"><b>Bước 1 — Tạo lập</b><p>Thêm API hook: lõi phân tích có thể cập nhật nguồn, trạng thái, tiến độ và stream báo cáo vào giao diện.</p></div>
+                <div class="abc-box"><b>Bước 2 — Tự hủy diệt</b><p>Chặn ba lỗi chết: hardcode nguồn, sập DOM do nhồi 10.000 dòng một lần và bấm lặp khi lõi đang xử lý.</p></div>
+                <div class="abc-box"><b>Bước 3 — Tái sinh</b><p>Dùng bridge động, render theo chunk, giới hạn vùng hiển thị, giữ bộ nhớ xuất báo cáo và khóa thao tác bằng loading state.</p></div>
+            </section>
+        </section>
+
+        <footer class="footer-note"><b>Nguyên tắc:</b> giao diện chỉ hiển thị dữ liệu lõi gửi vào. Nếu không có dữ liệu thật, hệ thống phải ghi rõ không đủ dữ liệu xác thực.</footer>
+        <div class="lock-overlay" id="lockOverlay"><div class="lock-card"><div class="spinner"></div><div class="lock-title" id="lockTitle">Đang xử lý</div><div class="lock-text" id="lockText">Đang kết nối lõi phân tích...</div></div></div>
+    </main>
+</div>
+<script>
+"use strict";
+(function(){
+    const cards = Array.from(document.querySelectorAll(".report-card"));
+    const previewBody = document.getElementById("previewBody");
+    const previewBox = document.getElementById("previewBox");
+    const previewMeter = document.getElementById("previewMeter");
+    const reportName = document.getElementById("reportName");
+    const reportRules = document.getElementById("reportRules");
+    const buildBtn = document.getElementById("buildBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const backBtn = document.getElementById("backBtn");
+    const fileList = document.getElementById("fileList");
+    const scanStatus = document.getElementById("scanStatus");
+    const scanNotice = document.getElementById("scanNotice");
+    const coreStatus = document.getElementById("coreStatus");
+    const coreLog = document.getElementById("coreLog");
+    const progressBar = document.getElementById("progressBar");
+    const lockOverlay = document.getElementById("lockOverlay");
+    const lockTitle = document.getElementById("lockTitle");
+    const lockText = document.getElementById("lockText");
+
+    const MAX_VISIBLE_CHARS = 120000;
+    const STREAM_BATCH_LINES = 24;
+
+    let selected = cards[0];
+    let isBusy = false;
+    let fullReportChunks = [];
+    let visibleTextNode = document.createTextNode("");
+    let lineCount = 0;
+    let streamQueue = [];
+    let streamScheduled = false;
+
+    previewBody.textContent = "";
+    previewBody.appendChild(visibleTextNode);
+
+    const defaultFiles = [
+        {name:"!DOCTYPE html.txt", state:"Không đọc được", level:"warn"},
+        {name:"HỆ THỐNG CAPABILITY TOKEN (CẤP QUYỀN TRUY CẬP).docx", state:"Không đọc được", level:"warn"},
+        {name:"bản cấu trúc hệ thống nghiên cứu xổ số trọng tâm cốt lõi.docx", state:"Không đọc được", level:"warn"},
+        {name:"nghiên cứu xổ số 1.docx", state:"Không đọc được", level:"warn"}
+    ];
+
+    function selectCard(card){
+        if(isBusy) return;
+        cards.forEach(function(item){ item.classList.remove("active"); });
+        card.classList.add("active");
+        selected = card;
+    }
+
+    cards.forEach(function(card){ card.addEventListener("click", function(){ selectCard(card); }); });
+
+    function setBusy(flag, title, detail){
+        isBusy = flag;
+        buildBtn.disabled = flag;
+        resetBtn.disabled = flag;
+        cards.forEach(function(card){ card.disabled = flag; });
+        lockOverlay.classList.toggle("show", flag);
+        if(title) lockTitle.textContent = title;
+        if(detail) lockText.textContent = detail;
+    }
+
+    function setCoreState(state, message, progress){
+        coreStatus.className = "core-status";
+        if(state === "loading") coreStatus.classList.add("loading");
+        if(state === "ready") coreStatus.classList.add("ready");
+        if(state === "error") coreStatus.classList.add("error");
+        coreStatus.textContent = message || "CHỜ KẾT NỐI";
+        if(typeof progress === "number") progressBar.style.width = Math.max(0, Math.min(100, progress)) + "%";
+    }
+
+    function setCoreLog(message){
+        coreLog.textContent = message || "";
+    }
+
+    function renderFiles(files, statusText, noticeText){
+        fileList.replaceChildren();
+        const safeFiles = Array.isArray(files) ? files : [];
+        safeFiles.forEach(function(file){
+            const row = document.createElement("div"); row.className = "file-row";
+            const name = document.createElement("div"); name.className = "file-name"; name.textContent = file.name || "Nguồn chưa đặt tên";
+            const state = document.createElement("div"); state.className = "file-state"; state.textContent = file.state || "Chưa rõ";
+            if(file.level === "ok") state.classList.add("ok");
+            if(file.level === "bad") state.classList.add("bad");
+            row.appendChild(name); row.appendChild(state); fileList.appendChild(row);
+        });
+        if(!safeFiles.length){
+            const row = document.createElement("div"); row.className = "file-row";
+            const name = document.createElement("div"); name.className = "file-name"; name.textContent = "Chưa có nguồn dữ liệu";
+            const state = document.createElement("div"); state.className = "file-state"; state.textContent = "Đang chờ";
+            row.appendChild(name); row.appendChild(state); fileList.appendChild(row);
+        }
+        scanStatus.className = "status-pill";
+        if(statusText && statusText.toLowerCase().includes("đủ")) scanStatus.classList.add("ok");
+        if(statusText && statusText.toLowerCase().includes("lỗi")) scanStatus.classList.add("bad");
+        scanStatus.textContent = statusText || "Chưa có dữ liệu lõi";
+        scanNotice.textContent = noticeText || "Nguồn có thể được cập nhật động bằng API hook.";
+    }
+
+    function resetPreview(text){
+        fullReportChunks = [];
+        lineCount = 0;
+        streamQueue = [];
+        streamScheduled = false;
+        visibleTextNode.data = text || "";
+        if(text) fullReportChunks.push(text);
+        previewMeter.textContent = (text ? text.split("\n").length : 0) + " dòng";
+        previewBox.scrollTop = 0;
+    }
+
+    function appendVisible(text){
+        if(!text) return;
+        fullReportChunks.push(text);
+        lineCount += (text.match(/\n/g) || []).length;
+        let current = visibleTextNode.data + text;
+        if(current.length > MAX_VISIBLE_CHARS){
+            current = "[Đã thu gọn phần đầu để tránh nghẽn DOM trên mobile. Nội dung đầy đủ vẫn nằm trong bộ nhớ xuất báo cáo của phiên này.]\n\n" + current.slice(-MAX_VISIBLE_CHARS);
+        }
+        visibleTextNode.data = current;
+        previewMeter.textContent = lineCount + " dòng · " + Math.round(current.length/1024) + "KB hiển thị";
+        previewBox.scrollTop = previewBox.scrollHeight;
+    }
+
+    function scheduleStreamFlush(){
+        if(streamScheduled) return;
+        streamScheduled = true;
+        requestAnimationFrame(function(){
+            let block = "";
+            let count = 0;
+            while(streamQueue.length && count < STREAM_BATCH_LINES){
+                block += streamQueue.shift();
+                count++;
+            }
+            appendVisible(block);
+            streamScheduled = false;
+            if(streamQueue.length) scheduleStreamFlush();
+        });
+    }
+
+    function streamLines(lines){
+        const arr = Array.isArray(lines) ? lines : [String(lines || "")];
+        arr.forEach(function(line){ streamQueue.push(String(line).endsWith("\n") ? String(line) : String(line) + "\n"); });
+        scheduleStreamFlush();
+    }
+
+    async function simulateCoreReport(){
+        const title = selected.dataset.title || "Báo cáo";
+        const template = selected.dataset.template || "Chưa có mô tả.";
+        const name = reportName.value.trim() || "Báo cáo chưa đặt tên";
+        const rules = reportRules.value.trim() || "Không có quy tắc bổ sung.";
+        setBusy(true,"Đang kết nối Bô Lão","Khóa thao tác để tránh bấm lặp gây nghẽn lõi.");
+        setCoreState("loading","ĐANG KẾT NỐI",8);
+        setCoreLog("[1/5] Mở cổng ReportWorkspaceBridge...\n[2/5] Chờ lõi phân tích gửi dữ liệu...");
+        resetPreview("");
+        streamLines(["# " + name,"","## Định dạng đã chọn",title,"","## Mục tiêu",template,"","## Quy tắc kiểm soát",rules,"", "## Luồng xử lý stream"]);
+        await new Promise(function(resolve){ setTimeout(resolve, 220); });
+        setCoreState("loading","ĐANG QUÉT NGUỒN",32);
+        streamLines(["- Kiểm tra nguồn đầu vào qua API hook.","- Nếu nguồn không đọc được, không sinh kết luận thay dữ liệu.","- Nếu lõi gửi 10.000 dòng, giao diện nhận theo chunk để tránh freeze."]);
+        await new Promise(function(resolve){ setTimeout(resolve, 220); });
+        setCoreState("loading","ĐANG STREAM BÁO CÁO",68);
+        setCoreLog("[3/5] Nhận dữ liệu theo dòng...\n[4/5] Render theo batch requestAnimationFrame...");
+        for(let i=1;i<=72;i++){
+            streamLines(["Dòng phân tích mô phỏng " + String(i).padStart(3,"0") + ": đây là dòng stream mẫu, thay bằng dữ liệu thật từ lõi khi tích hợp."]);
+            if(i % 12 === 0) await new Promise(function(resolve){ setTimeout(resolve, 25); });
+        }
+        setCoreState("ready","HOÀN TẤT STREAM",100);
+        streamLines(["","## Kết luận kiểm soát","Không có đủ dữ liệu xác thực từ tệp nếu lõi không gửi nguồn đọc được. Giao diện đã sẵn sàng nhận dữ liệu động qua window.ReportWorkspaceBridge."]);
+        setCoreLog("[5/5] Hoàn tất. Player báo cáo không bị nhồi DOM một lần.");
+        setBusy(false);
+    }
+
+    buildBtn.addEventListener("click", function(){ simulateCoreReport(); });
+
+    resetBtn.addEventListener("click", function(){
+        reportName.value = "Báo cáo kiểm định nguồn dữ liệu và thiết kế không gian nghiên cứu";
+        reportRules.value = "Không ảo giác. Không suy luận thay dữ liệu. Nếu thiếu dữ kiện phải ghi rõ Không có đủ dữ liệu xác thực. Áp dụng tam giác Tạo lập - Tự hủy diệt - Tái sinh.";
+        selectCard(cards[0]);
+        setCoreState("","CHỜ KẾT NỐI",0);
+        setCoreLog("Bridge sẵn sàng: window.ReportWorkspaceBridge");
+        renderFiles(defaultFiles,"Không đủ dữ liệu xác thực","Các tệp hiện tại không đọc được bằng công cụ quét. Khi lõi gửi nguồn thật, khu vực này sẽ cập nhật động.");
+        resetPreview("Chọn một định dạng báo cáo rồi bấm “Tạo báo cáo stream”.");
+    });
+
+    backBtn.addEventListener("click", function(){
+        resetPreview("Đã kích hoạt nút Trở về. Trong hệ thống thật, nút này sẽ nối với router/bridge của không gian chính.");
+    });
+
+    window.ReportWorkspaceBridge = {
+        setFiles:function(files, statusText, noticeText){ renderFiles(files, statusText, noticeText); },
+        setStatus:function(state, message, progress){ setCoreState(state, message, progress); },
+        setLog:function(message){ setCoreLog(message); },
+        startLoading:function(title, detail){ setBusy(true, title || "Đang xử lý", detail || "Đang chờ lõi phân tích..."); },
+        stopLoading:function(){ setBusy(false); },
+        resetReport:function(text){ resetPreview(text || ""); },
+        streamReport:function(lines){ streamLines(lines); },
+        getFullReport:function(){ return fullReportChunks.join(""); }
+    };
+
+    renderFiles(defaultFiles,"Không đủ dữ liệu xác thực","Các tệp hiện tại không đọc được bằng công cụ quét. Khi lõi gửi nguồn thật, khu vực này sẽ cập nhật động.");
+    resetPreview("Chọn một định dạng báo cáo rồi bấm “Tạo báo cáo stream”.");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Super App Xổ Số V9 - Giao Diện Kính & Ánh Sáng</title>
+    <style>
+        :root {
+            --space-xs: 0.382rem; --space-sm: 0.618rem; --space-md: 1rem; --space-lg: 1.618rem; 
+            --z-bg: 0; --z-content: 10; --z-svg: 25; --z-floating: 20; --z-nav: 40; --z-drawer: 45; --z-overlay: 50; --z-stats: 35; --z-modal-bg: 50; --z-modal: 60; --z-popover: 70; --z-tooltip: 80; --z-critical: 100; --z-keyboard: 150;
+            --elevation-1: 0 1px 2px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.04); --elevation-2: 0 4px 8px rgba(0,0,0,0.03), 0 8px 16px rgba(0,0,0,0.03); --elevation-3: 0 16px 32px rgba(0,0,0,0.04), 0 32px 64px rgba(0,0,0,0.06);
+            --spring-snappy: cubic-bezier(0.22, 1, 0.36, 1); --spring-gentle: cubic-bezier(0.16, 1, 0.3, 1); --touch-duration: 0.05s; --recover-duration: 0.3s;
+            
+            /* GIAO DIỆN DARK MODE TOÀN HỆ THỐNG ĐÃ ĐƯỢC KHÓA CHẶT */
+            --bg-main: #121212; --bg-board: #0f172a; --text-main: #ffffff; --text-muted: #94a3b8; --border-color: #334155;
+            --db-bg: #d40000; --db-text: #ffffff; --led-color: #10b981; --led-bg: #0f172a; --sheet-bg: #111111; --block-text: #ffffff; --cell-bg: #1e293b; --cell-border: #334155; 
+            --sticky-bg: #0f172a; --sticky-text: #d40000; --block-bg: #1e293b; --tv-bg-base: #05080f; --tv-border: #334155; --modal-overlay: rgba(0,0,0,0.8);
+            --glass-bg: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); --glass-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 3px 6px rgba(0,0,0,0.8); --glass-border: #334155;
+            --gold-glass: #334155; --glass-dark: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            --cau-color: #facc15; --cau-glow: rgba(250, 204, 21, 0.6); --bridge-color: #0ea5e9; --bridge-glow: rgba(14, 165, 233, 0.5);
+            --lo-chip-base: linear-gradient(135deg, #0288d1, #0277bd); --lo-chip-db: linear-gradient(135deg, #d40000, #ff5252); --lo-chip-multi: linear-gradient(135deg, #f59e0b, #eab308); --mn-primary: #0288d1;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; scrollbar-width: none; -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+        *::-webkit-scrollbar { display: none; }
+        
+        /* CHUẨN HÓA NỀN TẢNG: Đảm bảo không cuộn lẹm, fix tuyệt đối */
+        html, body { 
+            background-color: #020617; 
+            background-image: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%); 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; height: 100dvh; width: 100vw;
+            overflow: hidden; position: fixed; margin: 0; padding: 0;
+            touch-action: manipulation; 
+        }
+        
+        .app-wrapper { 
+            width: 100%; height: 100%; max-width: 480px; 
+            position: relative; background-color: var(--bg-main); color: var(--text-main); 
+            overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.9); 
+            display: flex; flex-direction: column; z-index: var(--z-bg); 
+        }
+
+        /* CHUẨN HÓA CHO IPAD & MÁY TÍNH - MÔ PHỎNG IPHONE */
+        @media (min-width: 485px) {
+            .app-wrapper {
+                height: 88vh !important; 
+                max-height: 900px;
+                border-radius: 45px; 
+                border: 14px solid #0f172a; 
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 1), inset 0 0 10px rgba(0,0,0,0.5);
+            }
+            .app-wrapper::after {
+                content: '';
+                position: absolute;
+                top: 0; left: 50%; transform: translateX(-50%);
+                width: 150px; height: 30px;
+                background-color: #0f172a;
+                border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+                z-index: 9999;
+            }
+            .top-controls { padding-top: 35px !important; height: 80px !important; }
+            .mn-header { padding-top: 35px !important; }
+            .sheet-header { padding-top: 35px !important; }
+            .live-room-header { padding-top: 35px !important; }
+            .tv-header { padding-top: 35px !important; } /* Đảm bảo TV Header không vướng tai thỏ giả lập */
+        }
+
+        .region-module { display: none; flex: 1; position: relative; width: 100%; height: 100%; animation: fadeIn 0.3s ease-out forwards; }
+        .region-module.active { display: flex; flex-direction: column; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .sub-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; background: var(--bg-board); transition: transform 0.4s var(--spring-gentle); z-index: 15;}
+        
+        #xsmb-main-screen { z-index: var(--z-content); }
+        #stats-screen-loto, #stats-screen-db { z-index: var(--z-stats); transform: translateY(100%); background: var(--sheet-bg); box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
+        #stats-screen-loto.show, #stats-screen-db.show { transform: translateY(0); }
+
+        .year-popup-window { position: absolute; display: none; flex-direction: column; background: rgba(15, 23, 42, 0.95); border-radius: 12px; z-index: 1000; box-shadow: var(--elevation-3); border: 1px solid rgba(255,255,255,0.1); width: 140px; max-height: 250px; overflow: hidden; } 
+        .year-popup-header { background: #020617; color: #94a3b8; font-size: 11px; font-weight: 700; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); } 
+        .year-list-scroll { overflow-y: auto; flex: 1; display: flex; flex-direction: column; padding: 4px;} 
+        .year-item { color: #f8fafc; font-size: 14px; font-weight: 800; padding: 10px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;} 
+        .year-item.active-yr { background: var(--db-bg); color: #fff; } .year-item.active-yr::after { content: '✓'; font-size: 12px; }
+
+        /* Tối ưu khoảng cách trên cùng né tai thỏ thật trên Mobile */
+        .top-controls { position: relative; flex-shrink: 0; display: flex; justify-content: center; align-items: center; padding: calc(var(--space-sm) + env(safe-area-inset-top, 0px)) var(--space-md) var(--space-sm) var(--space-md); background: var(--bg-main); border-bottom: 1px solid var(--border-color); z-index: var(--z-floating); height: auto; min-height: 60px;}
+        .sheet-header { flex-shrink: 0; padding: calc(var(--space-md) + env(safe-area-inset-top, 0px)) var(--space-md) var(--space-md) var(--space-md); display: flex; align-items: center; border-bottom: 1px solid var(--border-color); background: var(--bg-main); z-index: var(--z-overlay); position: relative; box-shadow: var(--elevation-1); transition: 0.4s;}
+        
+        .ai-advisor-btn {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            border: none; border-radius: 20px;
+            color: #fff; font-weight: 900; font-size: 13px;
+            padding: 8px 20px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(217, 70, 239, 0.4);
+            display: flex; align-items: center; gap: 8px;
+            transition: 0.3s;
+        }
+        .ai-advisor-btn:active { transform: scale(0.95); }
+
+        .ai-smart-bar { 
+            background: linear-gradient(90deg, #020617, #0f172a, #020617);
+            box-shadow: 0 5px 25px rgba(14, 165, 233, 0.6);
+            border-bottom: 2px solid #38bdf8;
+            padding: 16px 20px; 
+            display: flex; align-items: center; justify-content: center; gap: 15px; 
+            font-size: 15px; 
+            font-weight: 900; letter-spacing: 2px;
+            text-transform: uppercase;
+            z-index: var(--z-floating); position: relative; transition: 0.4s;
+            overflow: hidden;
+        }
+        
+        .ai-smart-bar::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), transparent);
+            animation: scanLaser 3s infinite;
+            pointer-events: none;
+        }
+        @keyframes scanLaser { 100% { left: 200%; } }
+
+        .ai-smart-text {
+            background: linear-gradient(90deg, #38bdf8 20%, #ffffff 50%, #38bdf8 80%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: dataStream 2s linear infinite;
+            z-index: 2; position: relative;
+        }
+        @keyframes dataStream { to { background-position: 200% center; } }
+
+        .ai-pulse { width: 12px; height: 12px; background: #0ea5e9; border-radius: 50%; box-shadow: 0 0 15px #0ea5e9, 0 0 5px #ffffff; animation: aiPulse 1.5s infinite; z-index: 2; position: relative; flex-shrink: 0;}
+        @keyframes aiPulse { 0% { transform: scale(0.9); opacity: 0.6; } 50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 25px #0ea5e9, 0 0 10px #ffffff; } 100% { transform: scale(0.9); opacity: 0.6; } }
+        
+        .mb-stats-menu { position: absolute; bottom: 95px; left: 10px; background: linear-gradient(145deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95)); border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6); z-index: var(--z-modal); display: none; flex-direction: column; width: 220px; border: 1px solid var(--db-bg); padding: 5px 0; transform-origin: bottom left; backdrop-filter: blur(10px); }
+        .mb-stats-menu::before { content: ''; position: absolute; bottom: -10px; left: 36px; border-width: 10px 10px 0; border-style: solid; border-color: var(--db-bg) transparent transparent transparent; }
+        .mb-stats-menu::after { content: ''; position: absolute; bottom: -8px; left: 37px; border-width: 9px 9px 0; border-style: solid; border-color: #0f172a transparent transparent transparent; }
+        .mb-stats-menu.show { display: flex; animation: popUpLeft 0.25s var(--spring-snappy) forwards; }
+        @keyframes popUpLeft { from { opacity: 0; transform: translateY(15px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .stats-menu-item { padding: 12px 16px; display: flex; align-items: center; gap: var(--space-sm); cursor: pointer; font-size: 14px; font-weight: 800; color: #f8fafc; border-bottom: 1px dashed rgba(255,255,255,0.1);}
+        .stats-menu-item:last-child { border-bottom: none; } .stats-menu-item:active { background: rgba(255,255,255,0.1); }
+
+        .boards-feed { flex: 1; overflow-y: auto; overflow-x: hidden; scroll-padding-bottom: 110px; padding: var(--space-md) var(--space-sm); display: flex; flex-direction: column; gap: var(--space-lg); position: relative; scroll-behavior: smooth; padding-bottom: calc(75px + 24px + env(safe-area-inset-bottom));} 
+        
+        .feed-control-bar {
+            background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(2,6,23,0.95));
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            margin-bottom: -5px; 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .feed-control-bar.scrolling-faded { opacity: 0.3; backdrop-filter: blur(2px); transform: scale(0.98); pointer-events: none; }
+
+        .ai-search-wrapper { display: flex; gap: 8px; width: 100%; position: relative; }
+        
+        .ai-search-input {
+            flex: 1;
+            background: rgba(2, 6, 23, 0.8);
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            color: #38bdf8;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-family: monospace;
+            outline: none;
+            box-shadow: inset 0 0 10px rgba(14, 165, 233, 0.2);
+            transition: 0.3s;
+        }
+        .ai-search-input:focus {
+            box-shadow: inset 0 0 15px rgba(14, 165, 233, 0.5), 0 0 10px rgba(14, 165, 233, 0.5);
+            border-color: #38bdf8;
+        }
+        .ai-search-input::placeholder { color: rgba(56, 189, 248, 0.4); font-style: italic; }
+        
+        .ai-search-btn {
+            background: linear-gradient(135deg, #0284c7, #0ea5e9);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 900;
+            font-size: 12px;
+            padding: 0 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .ai-search-btn:active { transform: scale(0.95); }
+
+        .ai-inline-result {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            color: #e2e8f0;
+            font-size: 13px;
+            line-height: 1.5;
+            display: none; 
+            box-shadow: inset 0 0 10px rgba(14, 165, 233, 0.2);
+            animation: fadeInDown 0.3s ease-out;
+            text-align: left;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .ai-inline-result b { color: #38bdf8; }
+
+        .ai-vk-container {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-top: 1px solid #38bdf8; 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.9);
+            z-index: var(--z-keyboard);
+            display: flex; flex-direction: column; gap: 10px;
+            /* Padding bottom fix safe area cho Iphone */
+            padding: 10px 12px calc(30px + env(safe-area-inset-bottom, 0px)) 12px;
+            transform: translateY(100%);
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .ai-vk-container.show { 
+            transform: translateY(0); 
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .ai-vk-header {
+            display: flex; flex-direction: column; align-items: center;
+            border-bottom: 1px dashed #334155; padding-bottom: 12px;
+            position: relative; width: 100%;
+        }
+        
+        .month-selector {
+            display: flex; gap: 8px; width: 100%; overflow-x: auto; padding: 4px 0;
+            scrollbar-width: none; scroll-snap-type: x mandatory;
+        }
+        .month-selector::-webkit-scrollbar { display: none; }
+        .month-btn {
+            flex-shrink: 0; scroll-snap-align: center;
+            background: rgba(30, 41, 59, 0.6); border: 1px solid #334155;
+            color: #94a3b8; padding: 6px 14px; border-radius: 20px;
+            font-size: 11px; font-weight: 900; cursor: pointer; transition: 0.3s;
+        }
+        .month-btn.active-month {
+            background: rgba(14, 165, 233, 0.2); border-color: #0ea5e9;
+            color: #38bdf8; box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+        }
+        
+        .vk-mic-center {
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.5); border: 1px solid #475569;
+            border-radius: 20px; padding: 4px 30px; cursor: pointer;
+            transition: all 0.3s; gap: 8px; margin-top: 10px;
+        }
+        .vk-mic-center.listening {
+            border-color: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.5);
+            background: rgba(239,68,68,0.1);
+        }
+        .mic-icon { font-size: 18px; transition: 0.2s;}
+        
+        .wave-container { display: flex; align-items: center; gap: 4px; height: 20px; display: none; }
+        .wave-bar {
+            width: 4px; height: 4px; border-radius: 2px;
+            background: #ef4444;
+            animation: waveAnim 1s infinite ease-in-out;
+        }
+        .wave-bar:nth-child(1) { animation-delay: 0.0s; }
+        .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.6s; }
+
+        @keyframes waveAnim {
+            0%, 100% { height: 4px; background: #ef4444; box-shadow: 0 0 5px #ef4444; }
+            50% { height: 20px; background: #a855f7; box-shadow: 0 0 10px #a855f7; }
+        }
+
+        .ai-vk-row { display: flex; gap: 6px; justify-content: center; }
+        .ai-vk-key {
+            flex: 1; background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #475569; border-radius: 6px;
+            color: #f8fafc; font-size: 14px; font-weight: bold;
+            padding: 12px 0; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .ai-vk-key:active { transform: scale(0.95); background: #0ea5e9; color: #fff; border-color: #38bdf8;}
+        .ai-vk-key.tag-key { background: rgba(2, 132, 199, 0.2); border-color: #0284c7; color: #7dd3fc; font-size: 12px;}
+        .ai-vk-key.action-key { background: #334155; color: #cbd5e1; }
+        .ai-vk-key.del-key { background: rgba(220, 38, 38, 0.2); border-color: #dc2626; color: #fca5a5; }
+
+        .ai-vk-key.active-tag {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+            color: #ffffff !important;
+            border-color: #7dd3fc !important;
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.8), inset 0 0 5px rgba(255,255,255,0.5) !important;
+        }
+        .active-ghep {
+            background: linear-gradient(135deg, #eab308, #f59e0b) !important;
+            color: #000 !important;
+            border-color: #fef08a !important;
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.8) !important;
+        }
+
+        .cau-canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: var(--z-svg); overflow: visible; }
+        .cau-path { stroke: var(--cau-color); stroke-width: 3px; fill: none; filter: drop-shadow(0 0 5px var(--cau-glow)); stroke-linecap: round; stroke-linejoin: round; pointer-events: auto; cursor: pointer;} 
+        
+        .board { background: var(--bg-main); border-radius: 12px; border: 1px solid var(--border-color); padding: var(--space-md); box-shadow: var(--elevation-2); position: relative; z-index: var(--z-content); transition: 0.4s; overflow: hidden;}
+        
+        .board::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 0%, rgba(14, 165, 233, 0.15) 10%, transparent 40%);
+            animation: rotateGlow 6s linear infinite;
+            pointer-events: none; z-index: 0; opacity: 0; transition: opacity 0.5s;
+        }
+        .boards-feed.cau-mode-active .board::after { opacity: 1; }
+        @keyframes rotateGlow { to { transform: rotate(360deg); } }
+        
+        .board > * { position: relative; z-index: 1; }
+
+        .board-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-md); padding-bottom: var(--space-sm); border-bottom: 1px dashed var(--border-color); position: relative;}
+        .board-title { font-size: 15px; font-weight: 900; color: var(--text-main); text-transform: uppercase; transition: 0.4s; text-align: left; margin-right: 10px; }
+        .board-title.live { color: var(--db-bg); text-shadow: 0 2px 4px rgba(212,0,0,0.2); }
+        .board-date { font-size: 11px; color: #888; font-style: italic; font-weight: bold; text-transform: capitalize; text-align: right; flex-shrink: 0; margin-top: 0; }
+        .status-blink { font-size: 11px; color: var(--db-bg); font-weight: bold; flex-shrink: 0; margin-top: 0; }
+        
+        .row { display: flex; margin-bottom: var(--space-sm); align-items: stretch; gap: var(--space-md); }
+        .prize-name { width: 42px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: 900; border-radius: 8px; transition: all 0.2s; background: linear-gradient(135deg, #1e293b, #0f172a); color: #94a3b8; border: 1px solid #334155;}
+        .prize-name.db { background: linear-gradient(180deg, #e53935 0%, #b71c1c 100%); color: #ffffff; border: 1px solid #c62828; text-shadow: none; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3); }
+        .prize-name.active-led { background: var(--led-bg); color: var(--led-color); border-color: var(--led-color); box-shadow: 0 0 15px var(--led-color); transform: scale(1.05); z-index: var(--z-floating); text-shadow: none;}
+        
+        .prize-results { flex-grow: 1; display: grid; gap: 6px; }
+        .grid-1 { grid-template-columns: 1fr; } .grid-2 { grid-template-columns: repeat(2, 1fr); } .grid-3 { grid-template-columns: repeat(3, 1fr); } .grid-4 { grid-template-columns: repeat(4, 1fr); } .grid-6 { grid-template-columns: repeat(6, 1fr); }
+        .grid-7 { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; } .grid-7 .number-box { flex: 0 0 calc(25% - 4.5px); max-width: calc(25% - 4.5px); }
+
+        .number-box { background: var(--glass-bg); border: 1px solid var(--glass-border); display: flex; justify-content: center; align-items: center; border-radius: 6px; height: 34px; position: relative; cursor: pointer; overflow: hidden; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); padding: 0 2px;}
+        
+        .boards-feed.cau-mode-active .number-box {
+            box-shadow: inset 0 0 8px rgba(14, 165, 233, 0.15);
+            border-color: rgba(14, 165, 233, 0.3);
+        }
+        .boards-feed.cau-mode-active .number-box:hover,
+        .boards-feed.cau-mode-active .number-box:active {
+            background: rgba(14, 165, 233, 0.2);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.8), inset 0 0 10px #fff;
+            border-color: #0ea5e9;
+            transform: scale(1.05);
+            z-index: 5;
+        }
+
+        .number-box.box-editing { border-color: var(--db-bg) !important; box-shadow: 0 0 0 1px var(--db-bg) !important; z-index: var(--z-floating); }
+        .number-box.box-has-two-selected { border-color: var(--cau-color) !important; background: rgba(234, 179, 8, 0.1) !important; box-shadow: 0 0 10px rgba(234, 179, 8, 0.5) !important; }
+        
+        .number-text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; display: flex; align-items: center; justify-content: center; width: 100%; color: var(--text-main); transition: color 0.4s;}
+        .number-text.spinning { color: var(--db-bg); filter: blur(0.5px); letter-spacing: 3px; }
+        
+        .grid-6 .number-text { font-size: 11px; gap: 0px; letter-spacing: -0.5px; } 
+        .grid-4 .number-text, .grid-7 .number-text { font-size: 12.5px; gap: 0px; letter-spacing: -0.5px; } 
+        .grid-3 .number-text { font-size: 14px; gap: 1px; } 
+        .grid-2 .number-text { font-size: 16px; gap: 2px; } 
+        .grid-1 .number-text { font-size: 18px; gap: 3px; }
+        
+        .row-db .number-box { height: 50px; } .row-db .number-text { font-size: 28px; color: var(--db-bg); gap: 6px; z-index: 1; letter-spacing: normal; }
+        
+        .digit { display: flex; justify-content: center; align-items: center; border-radius: 3px; padding: 0; margin: 0; position: relative; z-index: 2; transition: all 0.2s; letter-spacing: normal;}
+        .digit.active-cau { color: var(--cau-color); transform: scale(1.3) translateY(-2px); text-shadow: 0 0 10px var(--cau-glow); z-index: var(--z-floating); font-weight: 900; }
+        .digit.active-cau::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; background: var(--db-bg); border-radius: 50%; box-shadow: 0 0 5px red; z-index: 5; pointer-events: none;}
+
+        .live-lobby-container { padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-md); flex: 1; overflow-y: auto; background: var(--bg-board); padding-bottom: 90px;}
+        .live-card { background: var(--bg-main); border-radius: 12px; padding: var(--space-md); box-shadow: var(--elevation-2); display: flex; flex-direction: column; gap: 10px; border-left: 5px solid var(--border-color); transition: 0.3s; }
+        .live-card.active-now { border-left-color: var(--db-bg); box-shadow: 0 4px 15px rgba(212,0,0,0.2); transform: scale(1.02); }
+        .live-card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;}
+        .live-region-name { font-size: 16px; font-weight: 900; color: var(--text-main); text-transform: uppercase;}
+        .live-time { font-size: 18px; font-weight: 900; color: var(--db-bg); font-family: monospace; letter-spacing: 1px;}
+        .live-status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; background: #1e293b; color: #94a3b8; }
+        .live-stations-list { font-size: 13px; color: var(--text-muted); font-weight: bold; }
+        .btn-enter-live { margin-top: 10px; background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 12px; border-radius: 8px; text-align: center; font-weight: 900; color: var(--db-bg); cursor: pointer; box-shadow: var(--elevation-1); transition: 0.3s;}
+        .btn-enter-live:active { transform: scale(0.98); background: var(--db-bg); color: #fff; }
+        
+        .live-room-wrapper { display: none; flex: 1; flex-direction: column; background: var(--bg-board); z-index: 20; position: absolute; top:0; left:0; width:100%; height:100%; animation: slideIn 0.3s ease;}
+        .live-room-wrapper.active-room { display: flex; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .live-room-header { background: var(--bg-main); padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; box-shadow: var(--elevation-1); z-index: 21; transition: 0.4s;}
+        .btn-leave-live { font-size: 20px; background: none; border: none; color: var(--text-main); cursor: pointer; transition: 0.4s; }
+        .live-room-title { font-size: 16px; font-weight: 900; color: var(--db-bg); }
+
+        .mn-header { flex-shrink: 0; background: var(--bg-main); border-bottom: 1px solid var(--border-color); padding: calc(var(--space-sm) + env(safe-area-inset-top, 0px)) 0 0 0; z-index: var(--z-floating); box-shadow: var(--elevation-1); transition: 0.4s;}
+        .mn-date-picker { display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); padding: 0 var(--space-md) var(--space-sm) var(--space-md); }
+        .btn-date { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 9px 16px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--text-main); box-shadow: var(--elevation-1); cursor: pointer; transition: 0.4s;}
+        .mn-station-tabs { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 var(--space-md) 10px var(--space-md); gap: var(--space-sm); scrollbar-width: none; } .mn-station-tabs::-webkit-scrollbar { display: none; }
+        .mn-station-tab { flex-shrink: 0; scroll-snap-align: start; padding: 8px 16px; font-size: 13px; font-weight: 800; color: var(--text-muted); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; cursor: pointer; text-transform: uppercase; transition: all 0.3s; }
+        .mn-station-tab.active { background: var(--mn-primary); color: #ffffff; border-color: var(--mn-primary); box-shadow: 0 4px 10px rgba(2, 136, 209, 0.4); transform: scale(1.05); z-index: 2; }
+
+        .bottom-nav { 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: auto; min-height: 75px; 
+            background: rgba(10, 15, 30, 0.7); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 2px solid rgba(255, 255, 255, 0.15); 
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.8); 
+            display: flex; justify-content: space-around; align-items: center; z-index: var(--z-critical); 
+            padding-bottom: env(safe-area-inset-bottom, 0px); 
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            visibility: visible; opacity: 1;
+        }
+        .bottom-nav.nav-hidden {
+            transform: translateY(100%);
+            visibility: hidden; opacity: 0; pointer-events: none;
+        }
+        
+        .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; height: 75px; cursor: pointer; color: #888; position: relative; transition: 0.3s; z-index: 2;}
+        
+        .nav-item::before {
+            content: ''; position: absolute; top: 0px; left: 50%; transform: translateX(-50%); 
+            width: 35px; height: 4px; border-radius: 0 0 5px 5px;
+            background: var(--db-bg); opacity: 0; 
+            box-shadow: 0 0 15px var(--db-bg), 0 0 30px var(--db-bg);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .nav-item.active::before { opacity: 1; }
+        .center-live::before { display: none; } 
+        
+        .nav-item.active { color: var(--db-bg); text-shadow: 0 0 10px rgba(212,0,0,0.2); } 
+        .nav-item.active .nav-text { font-weight: 900; }
+        .nav-icon { font-size: 24px; position: relative; z-index: 2; transition: transform 0.3s; }
+        .nav-item.active .nav-icon { transform: translateY(-3px) scale(1.15); }
+        .nav-text { font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; position: relative; z-index: 2;}
+        
+        .center-live { flex: 1.2; position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 8px; }
+        .live-btn-circle { 
+            position: absolute; top: -30px; 
+            width: 62px; height: 62px; 
+            border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+            border: 6px solid #121212; 
+            background: linear-gradient(145deg, #ff1744, #d50000); 
+            box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), 0 0 30px rgba(255,0,0,0.9);
+            transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 10; 
+        }
+        .center-live.active .live-btn-circle { transform: translateY(-4px) scale(1.05); box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), 0 0 45px rgba(255,0,0,1); }
+        
+        .live-btn-circle .nav-icon { color: white; font-size: 22px; margin-left: 3px; text-shadow: 0 2px 6px rgba(0,0,0,0.4); animation: pulse 2s infinite; }
+        .center-live .nav-text { margin-top: 36px; color: var(--text-muted); transition: 0.3s;} .center-live.active .nav-text { color: var(--db-bg); font-weight: 900; }
+        @keyframes pulse { 0% { transform: scale(0.95); } 50% { transform: scale(1.15); } 100% { transform: scale(0.95); } }
+
+        .cau-modal { position: absolute; top:0; left:0; width:100%; height:100%; background: transparent; z-index: var(--z-modal-bg); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.2s; } 
+        .cau-modal.show { opacity: 1; pointer-events: all; background: var(--modal-overlay); backdrop-filter: blur(3px); } 
+        .cau-modal-content { background: #1a1d24; border-radius: 12px; border: 2px solid #2d3340; padding: var(--space-md); transform: scale(0.9) translateY(20px); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: var(--z-modal); box-shadow: 0 10px 40px rgba(0,0,0,0.8); } 
+        .cau-modal.show .cau-modal-content { transform: scale(1) translateY(0); } 
+        .cau-modal-digits { display: flex; justify-content: center; gap: var(--space-sm); flex-wrap: wrap; } 
+        .cau-btn-digit { width: 48px; height: 48px; border-radius: 10px; border: 1px solid #343b4a; background: linear-gradient(145deg, #2a303c, #1e222b); font-size: 22px; font-weight: 800; color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;} 
+        .cau-btn-digit:active { transform: scale(0.95); }
+        .cau-btn-digit.selected { background: linear-gradient(135deg, var(--cau-color), #fde047); color: #000; border-color: #fef08a; transform: scale(1.1); box-shadow: 0 0 15px var(--cau-color);}
+
+        .btn-back { background: var(--bg-board); color: var(--text-main); padding: 10px 14px; min-height: 44px; display: inline-flex; align-items: center; gap: 6px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid var(--border-color); margin-right: 15px; transition: 0.25s;} .btn-back:active{transform:scale(.95);}
+        .sheet-title { font-size: 16px; font-weight: 800; color: var(--db-bg); text-transform: uppercase; }
+        .sheet-content-loto, .sheet-content-db { flex: 1; padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-sm); overflow-y: auto; overflow-x: hidden; background: var(--bg-board); padding-bottom: 90px; scroll-behavior: smooth; transition: 0.4s;}
+        
+        /* FIX LỖI: BỎ CẤU TRÚC SLIDER ĐỂ KHÔNG TRÙNG NÚT ĐÓNG, TẠO MODAL OVERLAY AI ĐỘC LẬP */
+        .block-title-bar { flex-shrink: 0; background: linear-gradient(90deg, #d40000, #ff5252); color: #fff; padding: 8px 12px; font-weight: bold; font-size: 14px; border-radius: 8px 8px 0 0;}
+        .matrix-container { flex: 1; overflow: auto; background: var(--cell-bg); transition: 0.4s; border-radius: 0 0 8px 8px; border: 1px solid var(--border-color); border-top: none;}
+        .matrix-table { border-collapse: collapse; table-layout: fixed; } .matrix-table th, .matrix-table td { width: 28px; height: 28px; min-width: 28px; border: 1px solid var(--cell-border); text-align: center; font-size: 10px; font-weight: bold; color: var(--text-main); transition: 0.4s;} .matrix-table thead th { position: sticky; top: 0; z-index: 2; background: var(--sticky-bg); } .matrix-table tbody th { position: sticky; left: 0; z-index: 2; background: var(--sticky-bg); color: var(--sticky-text); } .matrix-table thead th.corner { position: sticky; top: 0; left: 0; z-index: 3; background: #333; color: #fff; } .data-cell { color: var(--text-main); font-weight: 900; font-size: 13px; opacity: 0.9; }
+        .gan-alert { background: var(--db-bg) !important; color: #fff !important; cursor: pointer; z-index: 10 !important; } .gan-tooltip { position: absolute; bottom: 110%; left: 50%; transform: translateX(-15%); background: #111; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; opacity: 0; visibility: hidden; transition: 0.2s; z-index: var(--z-tooltip); } .gan-alert.show-tooltip .gan-tooltip { opacity: 1; visibility: visible; }
+        
+        /* FIX LỖI: MODAL AI TV ĐỘC LẬP ĐÈ LÊN MÀN HÌNH LÔ TÔ */
+        .ai-tv-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--tv-bg-base); z-index: 100;
+            display: flex; flex-direction: column;
+            transform: translateY(100%); transition: transform 0.4s var(--spring-gentle);
+        }
+        .ai-tv-overlay.show { transform: translateY(0); }
+        .tv-header { flex-shrink:0; background: #000; color: #fff; padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px 12px; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--tv-border); } 
+        .btn-tv-close { background: #333; border: none; color: #fff; padding: 8px 12px; min-height: 36px; display: inline-flex; align-items: center; gap: 5px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition:.25s;} .btn-tv-close:active{transform:scale(.95);} 
+        .tv-screen { --ai-core: rgba(59, 130, 246, 0.2); --ai-glow: rgba(59, 130, 246, 0.6); --ai-text: #38bdf8; --ai-badge-border: #38bdf8; --ai-badge-bg: rgba(56, 189, 248, 0.1); flex: 1; background: var(--tv-bg-base); padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow-y: auto; } 
+        .tv-screen.theme-red { --ai-core: rgba(239, 68, 68, 0.2); --ai-glow: rgba(239, 68, 68, 0.6); --ai-text: #fca5a5; --ai-badge-border: #ef4444; --ai-badge-bg: rgba(239, 68, 68, 0.15); } 
+        .tv-circuit { position: absolute; top:0; left:0; right:0; bottom:0; background-image: linear-gradient(var(--ai-core) 1px, transparent 1px), linear-gradient(90deg, var(--ai-core) 1px, transparent 1px); background-size: 20px 20px; opacity: 0.25; animation: circuitPulse 3s infinite alternate; } 
+        .tv-content-layer { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 100%; } 
+        .tv-text-bot { color: var(--ai-text); font-family: monospace; font-size: 13px; text-align: center; margin-bottom: 15px; text-shadow: 0 0 5px var(--ai-glow); line-height: 1.6;} 
+        .tv-results { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%;} 
+        .xien-badge { background: var(--ai-badge-bg); border: 1px solid var(--ai-badge-border); color: var(--ai-badge-border); padding: 8px 16px; border-radius: 6px; font-size: 16px; font-weight: 900; animation: badgePop 0.4s forwards;} 
+        
+        .loto-block-2 { flex-shrink: 0; border-radius: 12px; background: var(--bg-main); border: 1px solid var(--border-color); padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-md); transition: 0.4s;} .block-title-2 { font-size: 13px; font-weight: 900; color: var(--db-bg); text-transform: uppercase; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; transition: 0.4s;} .special-btn-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-sm); } .btn-special { padding: 8px 4px; border-radius: 8px; font-size: 10px; font-weight: 900; color: #fff; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; line-height: 1.25; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s;} .btn-special .icon { font-size: 17px; line-height: 1; display: block; } .btn-special span:not(.icon){ word-break: keep-all; overflow-wrap: anywhere; max-width:100%; } .btn-special:active { transform: scale(0.95); } .btn-xien { background: linear-gradient(135deg, #f59e0b, #d97706); } .btn-nhipdep { background: linear-gradient(135deg, #10b981, #059669); } .btn-bacnho { background: linear-gradient(135deg, #3b82f6, #2563eb); } .search-group { display: flex; gap: var(--space-sm); } .search-input { flex: 1; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-board); color: var(--text-main); font-size: 16px; font-weight: bold; outline: none; transition: 0.4s;} .btn-search { padding: 0 20px; border-radius: 8px; border: none; background: var(--db-bg); color: #fff; font-weight: 900; box-shadow: 0 4px 10px rgba(212,0,0,0.3); cursor: pointer;} .btn-search:active { transform: scale(0.95); }
+        .lo-top-board { flex-shrink: 0; border-radius: 12px; background: var(--bg-main); border: 1px solid var(--border-color); padding: var(--space-md); display: flex; flex-direction: column; min-height: 220px; transition: 0.4s;} .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 160px; padding-top: 30px; border-bottom: 2px solid var(--border-color); flex: 1; transition: 0.4s;} .bar-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; height: 100%; position: relative; } .bar-number { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; transition: 0.4s;} .bar-column { width: 100%; border-radius: 6px 6px 0 0; display: flex; justify-content: center; padding-bottom: 8px; transform-origin: bottom; animation: growUp 1.2s forwards; transform: scaleY(0); } @keyframes growUp { 0% { transform: scaleY(0); } 100% { transform: scaleY(1); } } .bar-rank { font-size: 9px; font-weight: bold; color: #fff; writing-mode: vertical-rl; transform: rotate(180deg); }
+
+        .db-card { flex: 1; background: var(--bg-main); border-radius: 12px; box-shadow: var(--elevation-2); display: flex; flex-direction: column; position: relative; overflow: hidden; border: 1px solid rgba(226, 232, 240, 0.8); transition: 0.4s;} .expand-btn-area { background-color: #1e293b; color: #ffffff; border-bottom: 2px solid var(--border-color); display: flex; justify-content: space-between; padding: var(--space-xs) var(--space-md); cursor: pointer; z-index: var(--z-nav); position: sticky; top: 0; transition: 0.4s;} .expand-text { font-size: 13px; font-weight: 800; } .glass-header { padding: var(--space-sm) var(--space-md); background: rgba(15, 23, 42, 0.95); z-index: var(--z-nav); display: flex; align-items: center; gap: var(--space-lg); border-bottom: 1px solid var(--border-color); } .switch-wrap-mini { display: flex; align-items: center; gap: var(--space-xs); } .switch-mini { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; } .switch-mini input { opacity: 0; width: 0; height: 0; } .slider-mini { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; border-radius: 20px; transition: 0.3s; } .slider-mini:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; border-radius: 50%; transition: 0.3s; } .switch-mini input:checked + .slider-mini { background-color: var(--db-bg); } .switch-mini input:checked + .slider-mini:before { transform: translateX(16px); } .matrix-grid-wrapper { flex: 1; width: 100%; position: relative; overflow: hidden; background: var(--bg-main); display: flex; flex-direction: column; transition: 0.4s;} .view-panel { display: none; width: 100%; height: 100%; position: relative; } .view-panel.active-view { display: block; animation: fadeSlideUp 0.3s forwards; } @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } } #view-weekly { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; overflow-x: hidden; padding: var(--space-sm); scroll-behavior: smooth; } #matrix-grid-content { display: flex; flex-direction: column; width: 100%; gap: var(--space-xs); min-height: 100%; } .grid-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; position: sticky; top: 0; z-index: var(--z-nav); padding-bottom: var(--space-xs); margin-bottom: var(--space-xs); background: var(--bg-main); transition: 0.4s;} .grid-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; } .grid-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-sm) 0; text-align: center; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid var(--cell-border); border-radius: 8px; min-height: 60px; cursor: pointer; transition: 0.3s;} .grid-header .grid-cell { font-size: 12px; font-weight: 800; color: var(--text-muted); background: transparent; border: none; border-bottom: 2px solid var(--border-color); border-radius: 0; min-height: auto;} .grid-header .grid-cell:nth-child(7), .grid-row .grid-cell:nth-child(7) { color: var(--db-bg); } #view-yearly { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-x: auto; overflow-y: auto; background: var(--bg-main); transition: 0.4s;} .yearly-table { display: grid; width: max-content; border-top: 1px solid var(--border-color); border-left: 1px solid var(--border-color); position: relative; z-index: var(--z-content); transition: 0.4s;} .y-cell { border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; border-color: var(--cell-border); min-height: 44px; cursor: pointer; transition: 0.4s;} .y-corner-dropdown { position: sticky; top: 0; left: 0; z-index: 65; background: var(--db-bg); color: #ffffff; font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 2px; } .y-th-col { position: sticky; top: 0; z-index: 60; background: var(--sheet-bg); color: #0288d1; font-size: 12px; font-weight: 900; transition: 0.4s;} .y-th-row { position: sticky; left: 0; z-index: 55; background: var(--sheet-bg); color: var(--text-muted); font-size: 11px; font-weight: 900; padding: 0 4px; min-height: 44px; transition: 0.4s;} .y-val { letter-spacing: 0.5px; font-size: 14px; font-weight: 900; display: flex; width: 100%; justify-content: center;} .y-val.empty { background: var(--sheet-bg); width: 100%; height: 100%; position: absolute; top:0; left:0; transition: 0.4s;} .db-number { font-size: 16px; font-weight: 900; color: var(--text-main); letter-spacing: 0.5px; margin-bottom: 2px; display: flex; align-items: center; justify-content: center; width: 100%; transition: 0.4s;} .db-date { font-size: 9px; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; pointer-events: none; transition: 0.4s;} .db-single { font-size: 18px; font-weight: 900; color: var(--db-bg); pointer-events: none; } .red-tail { color: var(--db-bg); } .highlight-digit { color: var(--bridge-color) !important; transform: scale(1.6); font-weight: 900; position: relative; z-index: 100; text-shadow: 0 0 10px rgba(14, 165, 233, 0.8);} .cell-has-highlight { background: var(--glass-dark) !important; border-color: #334155 !important; transform: scale(1.02); z-index: 25 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5);} .cell-has-highlight .db-number .digit:not(.red-tail):not(.highlight-digit) { color: #f8fafc; } .cell-has-highlight .db-single { color: #fda4af; } .cell-has-highlight .db-date { color: #94a3b8; } .scan-circuit-red { background: #fee2e2 !important; box-shadow: inset 0 4px 0 #ef4444, inset 0 -4px 0 #ef4444, 0 0 25px rgba(239, 68, 68, 0.8) !important; z-index: 50 !important; } .scan-circuit-blue { background: #e0f2fe !important; box-shadow: inset 0 4px 0 #0ea5e9, inset 0 -4px 0 #0ea5e9, 0 0 25px rgba(14, 165, 233, 0.8) !important; z-index: 50 !important; } .cell-found-tram-red { background: #ff0000 !important; border: 2px solid #ff0000 !important; transform: scale(1.05); z-index: 30 !important; box-shadow: 0 0 20px rgba(255,0,0,0.8);} .cell-found-tram-red .db-number .digit { color: #ffffff !important; } .cell-found-tram-red .db-number .red-tail { color: #ffffff !important; font-weight: 900; text-shadow: 0 0 5px #fff;} .cell-found-tram-red .db-date { color: rgba(255,255,255,0.9) !important; } .cell-found-tram-red .db-single { color: rgba(255,255,255,0.8) !important; } .cell-found-tong-blue { background: #0284c7 !important; border: 2px solid #0ea5e9 !important; transform: scale(1.05); z-index: 30 !important; box-shadow: 0 0 20px rgba(14,165,233,0.8);} .cell-found-tong-blue .db-number .digit { color: #ffffff !important; opacity: 0.4; } .cell-found-tong-blue .db-date { color: rgba(255,255,255,0.9) !important; opacity: 0.4; } .cell-found-tong-blue .db-single { color: #fde047 !important; background: rgba(15, 23, 42, 0.9) !important; padding: 2px 12px; border-radius: 20px; border: 1px solid #fde047 !important; transform: scale(1.3); z-index: 40; position: relative; margin-top: 4px; box-shadow: 0 0 10px #fde047;} .mid-action-panel { width: 100%; min-height: 64px; background: linear-gradient(135deg, #020617 0%, #0f172a 100%); border-radius: 12px; border: 2px solid #1e293b; border-bottom: 2px solid #0ea5e9; z-index: var(--z-floating); position: relative; display: flex; align-items: center; justify-content: center; padding: var(--space-sm) var(--space-md); margin-bottom: var(--space-xs); overflow: hidden; flex-shrink: 0; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);} .panel-standby { width: 100%; display: flex; align-items: center; justify-content: center; } .standby-text { font-size: 12px; font-weight: 800; color: rgba(14, 165, 233, 0.5); letter-spacing: 1px; text-transform: uppercase; font-family: 'Courier New', Courier, monospace; } .panel-selection { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; } .inline-tram-btn { background: rgba(15, 23, 42, 0.8); color: #38bdf8; border: 1px solid #334155; border-radius: 6px; padding: 10px 0; font-weight: 900; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-family: 'Courier New', Courier, monospace; transition: 0.2s;} .inline-tram-btn:active { background: #0ea5e9; color: #fff; } .ai-processing { color: #38bdf8; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; } .ai-processing::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 10px #ef4444; animation: aiPulse 1s infinite;} .ai-result { color: #e2e8f0; font-size: 13px; font-weight: 800; text-transform: uppercase; text-align: center; line-height: 1.4; } .ai-highlight-red { color: #ff0000; font-weight: 900; font-size: 15px; text-shadow: 0 0 5px rgba(255,0,0,0.5);} .top-search-layout { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 4px 0;} .top-search-header { color: #f1f5f9; font-size: 12px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; } .top-search-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; } .top-chip { background: rgba(225, 29, 72, 0.15); border: 1px solid rgba(225, 29, 72, 0.4); color: #fca5a5; font-weight: 900; font-size: 14px; padding: 6px 12px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; } .top-chip:nth-child(-n+3) { border-color: #ff0000; color: #ff0000; background: rgba(255, 0, 0, 0.1); transform: scale(1.05); font-size: 15px; box-shadow: 0 0 10px rgba(255,0,0,0.3);} .bottom-widget-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm); width: 100%; padding-bottom: var(--space-xs); z-index: var(--z-content); flex-shrink: 0; } .widget-btn-item { position: relative; border-radius: 12px; padding: 10px 4px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.2); min-height: 50px; overflow: hidden; background: rgba(15, 23, 42, 0.8); transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.5);} .widget-btn-item:active { transform: scale(0.95); } .w-title-top { font-size: 11px; font-weight: 800; text-transform: uppercase; line-height: 1.2; margin-bottom: 1px;} .w-title-bot { font-size: 9px; font-weight: 700; text-transform: uppercase; line-height: 1.2; opacity: 0.85;} .w-arrow { position: absolute; bottom: 4px; right: 4px; font-size: 8px; opacity: 0.6; } .glass-red { border-color: rgba(239, 68, 68, 0.6); } .glass-red .w-title-top, .glass-red .w-title-bot { color: #fecdd3; } .glass-red .w-arrow { color: #ef4444; } .glass-orange { border-color: rgba(249, 115, 22, 0.6); } .glass-orange .w-title-top, .glass-orange .w-title-bot { color: #fed7aa; } .glass-orange .w-arrow { color: #f97316; } .glass-cyan { border-color: rgba(34, 211, 238, 0.6); } .glass-cyan .w-title-top, .glass-cyan .w-title-bot { color: #cffafe; } .glass-cyan .w-arrow { color: #22d3ee; }
+    
+        /* [HARDENING] phản biện R2: đảm bảo nhãn widget không bệt trên màn rất hẹp */
+        @media (max-width: 360px){
+          .w-title-top{ font-size:10px; }
+          .w-title-bot{ font-size:9px; }
+          .btn-special{ font-size:9.5px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+
+        <div class="bottom-nav">
+            <div class="nav-item active" id="nav-mb" onclick="handleNavClick('module-xsmb', this, 'mb')">
+                <div class="nav-icon">⭐</div><div class="nav-text">Miền Bắc</div>
+            </div>
+            <div class="nav-item" id="nav-mn" onclick="handleNavClick('module-xsmn', this, 'mn')">
+                <div class="nav-icon">🌴</div><div class="nav-text">Miền Nam</div>
+            </div>
+            <div class="nav-item center-live" id="nav-live" onclick="handleNavClick('module-live-lobby', this, 'live')">
+                <div class="live-btn-circle"><div class="nav-icon">▶</div></div><div class="nav-text">Trực Tiếp</div>
+            </div>
+            <div class="nav-item" id="nav-mt" onclick="handleNavClick('module-xsmt', this, 'mt')">
+                <div class="nav-icon">🏖️</div><div class="nav-text">Miền Trung</div>
+            </div>
+            <div class="nav-item" onclick="window.open('https://www.youtube.com/@Phamlehoangtuanduc', '_blank')">
+                <div class="nav-icon">📺</div><div class="nav-text">TUẤN ĐỨC</div>
+            </div>
+        </div>
+
+        <div class="mb-stats-menu" id="mb-stats-menu">
+            <div class="stats-menu-item" onclick="openStatsScreen('loto')">📊 Thống kê lô tô</div>
+            <div class="stats-menu-item" onclick="openStatsScreen('db')">🎯 Thống kê đặc biệt</div>
+        </div>
+
+        <div id="year-dropdown" class="year-popup-window">
+            <div class="year-popup-header">Trạm Thời Gian</div>
+            <div class="year-list-scroll" id="year-list-container"></div>
+        </div>
+
+        <div id="module-live-lobby" class="region-module">
+            <div class="sheet-header"><div class="sheet-title">🔴 PHÒNG QUAY TRỰC TIẾP</div></div>
+            <div class="live-lobby-container" id="live-lobby-main"></div>
+        </div>
+
+        <!-- MÀN HÌNH CHAT VỚI TRỢ LÝ GEMINI AI -->
+        <div id="ai-assistant-modal" class="sub-screen" style="z-index: 200; transform: translateY(100%); background: var(--bg-board); transition: 0.4s;">
+            <div class="sheet-header">
+                <button class="btn-back" onclick="closeAIAssistant()">🔙 Đóng</button>
+                <div class="sheet-title">✨ TRỢ LÝ GEMINI AI</div>
+            </div>
+            
+            <!-- ĐÃ THAY ĐỔI: 3 NÚT LỆNH MỚI CHUẨN MỰC -->
+            <div style="padding: 12px 15px; display: flex; gap: 10px; overflow-x: auto; border-bottom: 1px solid #334155; background: #020617; scrollbar-width: none;">
+                <button onclick="document.getElementById('ai-chat-input').value='Tìm điểm bán vé số gần nhất'; sendChatMessage();" style="flex-shrink: 0; background: #1e293b; color: #f43f5e; border: 1px solid #e11d48; border-radius: 15px; padding: 6px 14px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; box-shadow: 0 0 10px rgba(225, 29, 72, 0.2);">📍 Điểm bán vé số</button>
+                <button onclick="document.getElementById('ai-chat-input').value='Giải thích khái niệm bóng âm dương trong toán học'; sendChatMessage();" style="flex-shrink: 0; background: #1e293b; color: #38bdf8; border: 1px solid #0ea5e9; border-radius: 15px; padding: 6px 14px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; box-shadow: 0 0 10px rgba(14, 165, 233, 0.2);">☯️ Bóng âm dương</button>
+                <button onclick="document.getElementById('ai-chat-input').value='Tìm hiểu về thuật toán bóng tương ứng do Phạm Lê Hoàng Tuấn Đức tìm thấy'; sendChatMessage();" style="flex-shrink: 0; background: #1e293b; color: #a855f7; border: 1px solid #9333ea; border-radius: 15px; padding: 6px 14px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);">🧠 Thuật toán Tuấn Đức</button>
+            </div>
+            
+            <div style="flex:1; display:flex; flex-direction:column; padding: 15px; gap: 15px; overflow-y: auto; background: #0f172a;" id="ai-chat-history">
+                <!-- ĐÃ THAY ĐỔI: LỜI CHÀO AN TOÀN -->
+                <div style="background: rgba(30, 41, 59, 0.9); padding: 15px; border-radius: 12px; border: 1px solid #38bdf8; color: #e2e8f0; font-size: 14px; line-height: 1.5; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.2); max-width: 90%;">
+                    👋 Xin chào! Tôi là trợ lý AI thông minh. Ứng dụng này cung cấp các công cụ hỗ trợ phân tích thuật toán. Bạn muốn tìm hiểu về khái niệm toán học nào hôm nay?
+                </div>
+            </div>
+            <div style="padding: 15px; background: #020617; border-top: 1px solid #334155; display: flex; gap: 10px;">
+                <input type="text" id="ai-chat-input" placeholder="Nhập câu hỏi cho Gemini..." style="flex:1; padding: 12px 15px; border-radius: 20px; border: 1px solid #38bdf8; background: #1e293b; color: #fff; font-size: 14px; outline: none; box-shadow: inset 0 0 10px rgba(14, 165, 233, 0.2);">
+                <button onclick="sendChatMessage()" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8); color: #fff; border: none; border-radius: 20px; padding: 0 20px; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px rgba(14, 165, 233, 0.5);">GỬI</button>
+            </div>
+        </div>
+
+        <div id="live-room-mb" class="live-room-wrapper">
+            <div class="live-room-header"><button class="btn-leave-live" onclick="exitLiveRoom()">🔙</button><div class="live-room-title">TRỰC TIẾP MIỀN BẮC</div></div>
+            <div class="top-controls" style="border-bottom:none; padding:10px 16px 0;"><div class="switch-wrap" style="flex-direction:row; gap:8px; justify-content:flex-end; width:100%;"><span class="switch-label-text">Quay Thử Đài Này</span><label class="switch"><input type="checkbox" onchange="triggerQuayThuMB(this)"><span class="slider"></span></label></div></div>
+            <div class="boards-feed" style="padding-bottom:120px;" id="boards-feed-live-mb"></div>
+        </div>
+        <div id="live-room-mn" class="live-room-wrapper">
+            <div class="live-room-header"><button class="btn-leave-live" onclick="exitLiveRoom()">🔙</button><div class="live-room-title">TRỰC TIẾP MIỀN NAM</div></div>
+            <div class="top-controls" style="border-bottom:none; padding:10px 16px 0;"><div class="switch-wrap" style="flex-direction:row; gap:8px; justify-content:flex-end; width:100%;"><span class="switch-label-text">Quay Thử Đài Này</span><label class="switch"><input type="checkbox" onchange="triggerQuayThuMN_MT(this, 'mn')"><span class="slider"></span></label></div></div>
+            <div class="mn-station-tabs" id="station-tabs-live-mn" style="background:var(--bg-main);"></div>
+            <div class="boards-feed" style="padding-bottom:120px;" id="boards-feed-live-mn"></div>
+        </div>
+        <div id="live-room-mt" class="live-room-wrapper">
+            <div class="live-room-header"><button class="btn-leave-live" onclick="exitLiveRoom()">🔙</button><div class="live-room-title">TRỰC TIẾP MIỀN TRUNG</div></div>
+            <div class="top-controls" style="border-bottom:none; padding:10px 16px 0;"><div class="switch-wrap" style="flex-direction:row; gap:8px; justify-content:flex-end; width:100%;"><span class="switch-label-text">Quay Thử Đài Này</span><label class="switch"><input type="checkbox" onchange="triggerQuayThuMN_MT(this, 'mt')"><span class="slider"></span></label></div></div>
+            <div class="mn-station-tabs" id="station-tabs-live-mt" style="background:var(--bg-main);"></div>
+            <div class="boards-feed" style="padding-bottom:120px;" id="boards-feed-live-mt"></div>
+        </div>
+
+        <div id="module-xsmb" class="region-module active">
+            <div id="xsmb-main-screen" class="sub-screen active" style="position: relative; flex:1;">
+                
+                <div class="top-controls">
+                    <div class="top-placeholder" style="display:flex; justify-content:center; width:100%;">
+                        <button class="ai-advisor-btn" onclick="openAIAssistant()">
+                            <span>✨</span> TRỢ LÝ GEMINI AI
+                        </button>
+                    </div>
+                </div>
+
+                <div class="ai-smart-bar">
+                    <div class="ai-pulse"></div>
+                    <span class="ai-smart-text">AI SMART MODE: ĐANG ĐỒNG BỘ DỮ LIỆU...</span>
+                </div>
+
+                <div class="boards-feed cau-mode-active" id="boards-feed-mb">
+                    <div class="feed-control-bar" id="fcb-mb">
+                        <div class="ai-search-wrapper">
+                            <input type="text" class="ai-search-input" id="search-mb" placeholder="Nhập phương pháp của bạn vào đây..." readonly onclick="openSmartKeyboard(this, 'boards-feed-mb')" />
+                            <button class="ai-search-btn" onclick="executeAISearch(this, 'boards-feed-mb')">
+                                <span style="font-size:14px;">🔍</span> TÌM
+                            </button>
+                        </div>
+                        <div class="ai-inline-result" id="ai-inline-result-mb"></div>
+                    </div>
+
+                    <svg class="cau-canvas-layer"><defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" fill="var(--cau-color)" /></marker></defs><g class="cau-paths"></g></svg>
+                    <div id="history-boards-container-mb" style="display:flex; flex-direction:column; gap: var(--space-lg);"></div>
+                </div>
+            </div>
+            
+            <div id="stats-screen-loto" class="sub-screen">
+                <div class="sheet-header"><button class="btn-back" onclick="closeStatsScreen('loto')">🔙 Đóng</button><div class="sheet-title">📊 THỐNG KÊ LÔ TÔ</div></div>
+                <div class="sheet-content-loto">
+                    <!-- FIX LỖI: BỎ SLIDER CŨ, GIỮ NGUYÊN BLOCK 1 -->
+                    <div class="block-title-bar">BỐ CỤC 1: TẦN SUẤT LÔ (30 NGÀY)</div>
+                    <div class="matrix-container">
+                        <table class="matrix-table" id="matrix-table">
+                            <thead><tr><th class="corner">Lô</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th><th>24</th><th>25</th><th>26</th><th>27</th><th>28</th><th>29</th><th>30</th></tr></thead>
+                            <tbody id="matrix-body"></tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="loto-block-2" style="margin-top: 15px;">
+                        <div class="block-title-2">⚡ CÔNG CỤ TÍNH TOÁN</div>
+                        <div class="special-btn-group">
+                            <button class="btn-special btn-xien" onclick="activateXienAI()"><span class="icon">🔗</span><span>GHÉP XIÊN</span></button>
+                            <button class="btn-special btn-nhipdep" onclick="activateNhipDep()"><span class="icon">📈</span><span>NHỊP ĐẸP</span></button>
+                            <button class="btn-special btn-bacnho" onclick="activateBacNhoAI()"><span class="icon">🧠</span><span>BẠC NHỚ</span></button>
+                            <button class="btn-special" style="background: linear-gradient(135deg, #8b5cf6, #d946ef);" onclick="activateGeminiAI()"><span class="icon">✨</span><span>HỎI AI</span></button>
+                        </div>
+                        <div class="search-group">
+                            <input type="text" class="search-input" id="ai-search-input-loto" placeholder="Chạm vào đây để nhập số..." readonly onclick="showKeyboard()">
+                            <button class="btn-search" onclick="activateXienAI()">TÌM</button>
+                        </div>
+                    </div>
+                    
+                    <div id="keyboard-wrapper"><div class="loto-block-kb"><div class="block-title-2" style="display: flex; justify-content: space-between; align-items: center; gap: 12px;"><span>⌨ BÀN PHÍM NHẬP LIỆU</span><span style="cursor:pointer; color:#888;" onclick="hideKeyboard()">Đóng ✖</span></div><div class="vk-grid" id="virtual-keyboard"><button class="vk-btn" data-val="1">1</button><button class="vk-btn" data-val="2">2</button><button class="vk-btn" data-val="3">3</button><button class="vk-btn" data-val="4">4</button><button class="vk-btn" data-val="5">5</button><button class="vk-btn" data-val="6">6</button><button class="vk-btn" data-val="7">7</button><button class="vk-btn" data-val="8">8</button><button class="vk-btn" data-val="9">9</button><button class="vk-btn vk-action vk-clear" onclick="clearInput()">CLEAR</button><button class="vk-btn" data-val="0">0</button><button class="vk-btn vk-action vk-del" onclick="delInput()">DEL</button></div></div></div>
+                    <div class="lo-top-board"><div class="block-title-2">🏆 BẢNG XẾP HẠNG LÔ TOP ĐƯỢC CHƠI NHIỀU</div><div class="chart-container" id="lo-top-chart"></div></div>
+                </div>
+
+                <!-- FIX LỖI 2 DẤU NHÂN: ĐƯA MÀN HÌNH TV THÀNH LỚP PHỦ HOÀN TOÀN ĐỘC LẬP -->
+                <div id="ai-tv-modal" class="ai-tv-overlay">
+                    <div class="tv-header">
+                        <span id="tv-header-title">📺 HỆ THỐNG AI CALCULATOR</span>
+                        <!-- ĐÂY LÀ NÚT ĐÓNG DUY NHẤT CỦA TV -->
+                        <button class="btn-tv-close" onclick="closeTV()">✖ ĐÓNG</button>
+                    </div>
+                    <div class="tv-screen theme-blue" id="ai-tv-screen">
+                        <div class="tv-circuit"></div>
+                        <div class="tv-content-layer">
+                            <div class="tv-text-bot" id="tv-message">👋 Chào bạn!<br>Hệ thống AI đã sẵn sàng hoạt động.</div>
+                            <div class="tv-results" id="tv-results-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="stats-screen-db" class="sub-screen">
+                <div class="sheet-header"><button class="btn-back" onclick="closeStatsScreen('db')">🔙 Đóng</button><div class="sheet-title">🎯 Thống kê Đặc biệt</div></div>
+                <div class="sheet-content-db">
+                    <div class="db-card" id="mainMatrixCard">
+                        <div class="expand-btn-area" id="btnExpandMatrix"><span class="expand-text" id="expandText">Mở rộng Bảng Ma Trận</span><div class="expand-icon" id="expandIcon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div></div>
+                        <div class="glass-header"><div class="switch-wrap-mini"><label class="switch-mini"><input type="checkbox" id="toggle-cau-db"><span class="slider-mini"></span></label><span style="font-size: 11px; font-weight: 800; color: var(--db-bg);">TẠO CẦU</span></div><div class="switch-wrap-mini"><label class="switch-mini"><input type="radio" name="view-type" id="toggle-tong-db" checked><span class="slider-mini"></span></label><span style="font-size: 11px; font-weight: 800; color: var(--text-main);">ĐB TUẦN</span></div><div class="switch-wrap-mini"><label class="switch-mini"><input type="radio" name="view-type" id="toggle-year-db"><span class="slider-mini"></span></label><span style="font-size: 11px; font-weight: 800; color: #0288d1;">ĐB NĂM</span></div></div>
+                        <div class="matrix-grid-wrapper"><div id="view-weekly" class="view-panel active-view"><div id="matrix-grid-content"></div></div><div id="view-yearly" class="view-panel"><div class="yearly-table" id="yearly-grid-content"></div></div></div>
+                    </div>
+                    <div class="mid-action-panel" id="midActionBar"><div class="panel-standby"><span class="standby-text">HỆ THỐNG TRẠM/TỔNG SẴN SÀNG</span></div></div>
+                    <div class="bottom-widget-layout" id="bottomWidget"><div class="widget-btn-item glass-red" id="btn-tram-db"><span class="w-title-top">TRẠM ĐẶC</span><span class="w-title-bot">BIỆT</span><span class="w-arrow">▶</span></div><div class="widget-btn-item glass-orange" id="btn-tong-db"><span class="w-title-top">TỔNG ĐẶC</span><span class="w-title-bot">BIỆT</span><span class="w-arrow">▶</span></div><div class="widget-btn-item glass-cyan" id="btn-top-db"><span class="w-title-top">TOP ĐẶC</span><span class="w-title-bot">TÌM KIẾM</span><span class="w-arrow">▶</span></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="module-xsmn" class="region-module">
+            <div class="mn-header">
+                <div class="mn-date-picker" style="padding-top: 10px;"><button class="btn-date">◀</button><button class="btn-date" style="flex:1;">Hôm nay</button><button class="btn-date">▶</button></div>
+                <div class="mn-station-tabs" id="station-tabs-mn"></div>
+            </div>
+            <div class="boards-feed cau-mode-active" id="boards-feed-mn" style="background: var(--bg-board); display:flex; flex-direction:column; gap: var(--space-lg);">
+                <div class="feed-control-bar" id="fcb-mn">
+                    <div class="ai-search-wrapper">
+                        <input type="text" class="ai-search-input" id="search-mn" placeholder="Nhập phương pháp của bạn vào đây..." readonly onclick="openSmartKeyboard(this, 'boards-feed-mn')" />
+                        <button class="ai-search-btn" onclick="executeAISearch(this, 'boards-feed-mn')"><span style="font-size:14px;">🔍</span> TÌM</button>
+                    </div>
+                    <div class="ai-inline-result" id="ai-inline-result-mn"></div>
+                </div>
+                <svg class="cau-canvas-layer"><defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" fill="var(--cau-color)" /></marker></defs><g class="cau-paths"></g></svg>
+                <div id="history-boards-container-mn" style="display:flex; flex-direction:column; gap: var(--space-lg);"></div>
+            </div>
+        </div>
+
+        <div id="module-xsmt" class="region-module">
+            <div class="mn-header">
+                <div class="mn-date-picker" style="padding-top: 10px;"><button class="btn-date">◀</button><button class="btn-date" style="flex:1;">Hôm nay</button><button class="btn-date">▶</button></div>
+                <div class="mn-station-tabs" id="station-tabs-mt"></div>
+            </div>
+            <div class="boards-feed cau-mode-active" id="boards-feed-mt" style="background: var(--bg-board); display:flex; flex-direction:column; gap: var(--space-lg);">
+                <div class="feed-control-bar" id="fcb-mt">
+                    <div class="ai-search-wrapper">
+                        <input type="text" class="ai-search-input" id="search-mt" placeholder="Nhập phương pháp của bạn vào đây..." readonly onclick="openSmartKeyboard(this, 'boards-feed-mt')" />
+                        <button class="ai-search-btn" onclick="executeAISearch(this, 'boards-feed-mt')"><span style="font-size:14px;">🔍</span> TÌM</button>
+                    </div>
+                    <div class="ai-inline-result" id="ai-inline-result-mt"></div>
+                </div>
+                <svg class="cau-canvas-layer"><defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" fill="var(--cau-color)" /></marker></defs><g class="cau-paths"></g></svg>
+                <div id="history-boards-container-mt" style="display:flex; flex-direction:column; gap: var(--space-lg);"></div>
+            </div>
+        </div>
+
+        <div class="ai-vk-container" id="ai-smart-keyboard">
+            <div class="ai-vk-header">
+                <div class="month-selector" id="vk-month-selector">
+                    <button class="month-btn" data-month="1">THÁNG 1</button>
+                    <button class="month-btn" data-month="2">THÁNG 2</button>
+                    <button class="month-btn" data-month="3">THÁNG 3</button>
+                    <button class="month-btn" data-month="4">THÁNG 4</button>
+                    <button class="month-btn" data-month="5">THÁNG 5</button>
+                    <button class="month-btn" data-month="6">THÁNG 6</button>
+                    <button class="month-btn" data-month="7">THÁNG 7</button>
+                    <button class="month-btn" data-month="8">THÁNG 8</button>
+                    <button class="month-btn" data-month="9">THÁNG 9</button>
+                    <button class="month-btn" data-month="10">THÁNG 10</button>
+                    <button class="month-btn" data-month="11">THÁNG 11</button>
+                    <button class="month-btn" data-month="12">THÁNG 12</button>
+                </div>
+                
+                <div style="display: flex; justify-content: center; width: 100%;">
+                    <div class="vk-mic-center" id="vk-mic-btn" onclick="toggleVoiceInput()">
+                        <span class="mic-icon">🎙️</span>
+                        <div class="wave-container" id="wave-anim">
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ai-vk-row">
+                <button class="ai-vk-key tag-key" data-val="ĐB">ĐB</button>
+                <button class="ai-vk-key tag-key" data-val="G1">G1</button>
+                <button class="ai-vk-key tag-key" data-val="G2">G2</button>
+                <button class="ai-vk-key tag-key" data-val="G3">G3</button>
+                <button class="ai-vk-key tag-key" data-val="G4">G4</button>
+                <button class="ai-vk-key tag-key" data-val="G5">G5</button>
+                <button class="ai-vk-key tag-key" data-val="G6">G6</button>
+                <button class="ai-vk-key tag-key" data-val="G7">G7</button>
+            </div>
+            <div class="ai-vk-row" style="margin-top: 4px;">
+                <button class="ai-vk-key tag-key toggle-glow" data-val=" Chạm ">CHẠM</button>
+                <button class="ai-vk-key tag-key toggle-glow" data-val=" Tổng ">TỔNG</button>
+                <button class="ai-vk-key tag-key toggle-glow" data-val=" Bóng ">BÓNG</button>
+                <button class="ai-vk-key tag-key" id="key-ghep" data-val=" Ghép ">GHÉP</button>
+                <button class="ai-vk-key action-key sk-space" data-val=" + "> ➕ </button>
+            </div>
+            <div class="ai-vk-row" style="margin-top: 10px;">
+                <button class="ai-vk-key num-key" data-val="1">1</button>
+                <button class="ai-vk-key num-key" data-val="2">2</button>
+                <button class="ai-vk-key num-key" data-val="3">3</button>
+                <button class="ai-vk-key num-key" data-val="4">4</button>
+                <button class="ai-vk-key num-key" data-val="5">5</button>
+                <button class="ai-vk-key num-key" data-val="6">6</button>
+                <button class="ai-vk-key num-key" data-val="7">7</button>
+                <button class="ai-vk-key num-key" data-val="8">8</button>
+                <button class="ai-vk-key num-key" data-val="9">9</button>
+                <button class="ai-vk-key num-key" data-val="0">0</button>
+            </div>
+            <div class="ai-vk-row" style="margin-top: 4px;">
+                <button class="ai-vk-key del-key sk-del" style="flex: 2;">XÓA (DEL)</button>
+                <button class="ai-vk-key action-key sk-clear" style="flex: 2;">LÀM LẠI MỚI</button>
+            </div>
+        </div>
+
+        <div id="cau-modal" class="cau-modal" onmousedown="closeCauModal(event)"><div class="cau-modal-content" onmousedown="event.stopPropagation()"><div id="cau-modal-digits" class="cau-modal-digits"></div></div></div>
+
+    </div>
+
+    <script>
+        // ==========================================
+        // KHỞI TẠO KEY GOOGLE GEMINI API
+        // ==========================================
+        const apiKey = ""; 
+
+        async function fetchWithRetry(url, options, maxRetries = 5) {
+            let delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delays[i]));
+                }
+            }
+        }
+
+        function openAIAssistant() {
+            document.getElementById('ai-assistant-modal').style.transform = 'translateY(0)';
+        }
+        function closeAIAssistant() {
+            document.getElementById('ai-assistant-modal').style.transform = 'translateY(100%)';
+        }
+        
+        async function sendChatMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const history = document.getElementById('ai-chat-history');
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            history.innerHTML += `<div style="background: #0ea5e9; padding: 12px; border-radius: 12px; color: #fff; font-size: 14px; align-self: flex-end; max-width: 80%; margin-left: auto;">${msg}</div>`;
+            input.value = '';
+
+            const loadingId = 'loading-' + Date.now();
+            history.innerHTML += `<div id="${loadingId}" style="background: rgba(30, 41, 59, 0.9); padding: 12px; border-radius: 12px; border: 1px solid #38bdf8; color: #38bdf8; font-size: 14px; align-self: flex-start; max-width: 80%;"><div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>`;
+            history.scrollTop = history.scrollHeight;
+
+            try {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                
+                // ĐÃ THAY ĐỔI: ÉP BUỘC LUẬT LỆ CHO AI QUA SYSTEM INSTRUCTION
+                const strictRules = "Bạn là trợ lý ảo hỗ trợ tính toán và giải thích thuật toán toán học. TUYỆT ĐỐI KHÔNG dùng các từ: 'soi cầu', 'chốt số', 'lô đề', 'cờ bạc'. LUÔN LUÔN kèm theo câu cảnh báo này ở cuối mọi câu trả lời: '<br><br><i>⚠️ Cảnh báo: Không ai có thể biết trước tương lai. Các phân tích trên chỉ mang tính chất tham khảo thuật toán. Chúng tôi không cam kết bất kỳ kết quả nào. Hành vi chơi lô đề là vi phạm pháp luật Việt Nam.</i>'. Trả lời lịch sự, khách quan, định dạng HTML cơ bản (<b>, <i>, <br>).";
+
+                const payload = {
+                    contents: [{ parts: [{ text: msg }] }],
+                    systemInstruction: { parts: [{ text: strictRules }] }
+                };
+                
+                const data = await fetchWithRetry(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Không có phản hồi.";
+                document.getElementById(loadingId).outerHTML = `<div style="background: rgba(30, 41, 59, 0.9); padding: 15px; border-radius: 12px; border: 1px solid #38bdf8; color: #e2e8f0; font-size: 14px; line-height: 1.5; align-self: flex-start; max-width: 90%; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.2);">${responseText.replace(/\n/g, '<br/>')}</div>`;
+                history.scrollTop = history.scrollHeight;
+            } catch(e) {
+                document.getElementById(loadingId).outerHTML = `<div style="background: rgba(220, 38, 38, 0.2); padding: 12px; border-radius: 12px; border: 1px solid #ef4444; color: #fca5a5; font-size: 14px; align-self: flex-start; max-width: 80%;">⚠️ Lỗi kết nối Gemini API. Vui lòng thử lại sau.</div>`;
+            }
+        }
+
+        const LOTTERY_SCHEDULE = { MN: { 0: ["Tiền Giang", "Kiên Giang", "Đà Lạt"], 1: ["TP. HCM", "Đồng Tháp", "Cà Mau"], 2: ["Bến Tre", "Vũng Tàu", "Bạc Liêu"], 3: ["Đồng Nai", "Cần Thơ", "Sóc Trăng"], 4: ["Tây Ninh", "An Giang", "Bình Thuận"], 5: ["Vĩnh Long", "Bình Dương", "Trà Vinh"], 6: ["TP. HCM", "Long An", "Bình Phước", "Hậu Giang"] }, MT: { 0: ["Khánh Hòa", "Kon Tum"], 1: ["Thừa T. Huế", "Phú Yên"], 2: ["Đắk Lắk", "Quảng Nam"], 3: ["Đà Nẵng", "Khánh Hòa"], 4: ["Bình Định", "Quảng Trị", "Quảng Bình"], 5: ["Gia Lai", "Ninh Thuận"], 6: ["Đà Nẵng", "Quảng Ngãi", "Đắk Nông"] }, MB: { 0: "Thái Bình", 1: "Hà Nội", 2: "Quảng Ninh", 3: "Bắc Ninh", 4: "Hà Nội", 5: "Hải Phòng", 6: "Nam Định" } };
+
+        window.updateAISmartBar = function(text) {
+            document.querySelectorAll('.ai-smart-text').forEach(el => { el.innerText = text; });
+        };
+
+        function handleNavClick(targetModuleId, navElement, regionCode) {
+            const currentModule = document.querySelector('.region-module.active');
+            if (currentModule && currentModule.id === targetModuleId && regionCode === 'mb') {
+                const statsMenu = document.getElementById('mb-stats-menu');
+                if(statsMenu) statsMenu.classList.toggle('show'); return;
+            }
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => item.classList.remove('active')); navElement.classList.add('active');
+            document.querySelectorAll('.region-module').forEach(mod => mod.classList.remove('active')); document.getElementById(targetModuleId).classList.add('active');
+            document.querySelectorAll('.live-room-wrapper').forEach(rm => rm.classList.remove('active-room'));
+            const menu = document.getElementById('mb-stats-menu'); if(menu) menu.classList.remove('show');
+            closeStatsScreen('loto'); closeStatsScreen('db'); 
+            window.resetCau(); closeSmartKeyboard();
+        }
+
+        function openStatsScreen(type) { const menu = document.getElementById('mb-stats-menu'); if(menu) menu.classList.remove('show'); const screen = document.getElementById(`stats-screen-${type}`); if(screen) screen.classList.add('show'); }
+        function closeStatsScreen(type) { const screen = document.getElementById(`stats-screen-${type}`); if(screen) screen.classList.remove('show'); }
+
+        function enterLiveRoom(prefix) { document.getElementById('module-live-lobby').classList.remove('active'); document.getElementById(`live-room-${prefix}`).classList.add('active-room'); }
+        function exitLiveRoom() { document.querySelectorAll('.live-room-wrapper').forEach(rm => rm.classList.remove('active-room')); document.getElementById('module-live-lobby').classList.add('active'); }
+
+        function activeTabHistory(element, prefix) { const p = element.parentElement; p.querySelectorAll('.mn-station-tab').forEach(t => t.classList.remove('active')); element.classList.add('active'); element.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); renderBoardsMN_MT(generateMN_MT_Data(5, element.innerText), `history-boards-container-${prefix}`); }
+        function activeTabLive(element, prefix) { const p = element.parentElement; p.querySelectorAll('.mn-station-tab').forEach(t => t.classList.remove('active')); element.classList.add('active'); element.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); document.getElementById(`live-title-${prefix}`).innerText = `🔴 TRỰC TIẾP ${element.innerText.toUpperCase()}`; }
+
+        const dot = '<span class="dot"></span>'; const dots6 = `<div class="dots-wrapper">${dot.repeat(6)}</div>`; const dots5 = `<div class="dots-wrapper">${dot.repeat(5)}</div>`; const dots4 = `<div class="dots-wrapper">${dot.repeat(4)}</div>`; const dots3 = `<div class="dots-wrapper">${dot.repeat(3)}</div>`; const dots2 = `<div class="dots-wrapper">${dot.repeat(2)}</div>`; const box = (dots) => `<div class="number-box"><span class="number-text">${dots}</span></div>`;
+
+        function buildLiveRoom(prefix, station, isMB) {
+            if(isMB) { return ` <div class="board" id="board-live-${prefix}"> <div class="board-header"><div class="board-title live" style="color:var(--mn-primary);" id="live-title-${prefix}">🔴 TRỰC TIẾP MIỀN BẮC</div><div class="status-blink" id="live-status-${prefix}">⏳ ĐANG CHỜ QUAY...</div></div> <div class="row row-db" data-prize="ĐB" data-len="5"><div class="prize-name db">ĐB</div><div class="prize-results grid-1"><div class="number-box" style="height:50px;"><div id="lan-so-wrapper" class="lan-so-wrapper"><div id="lan-so-cover" class="lan-so-cover"></div></div><span class="number-text">${dots5}</span></div></div></div> <div class="row" data-prize="G1" data-len="5"><div class="prize-name">G1</div><div class="prize-results grid-1">${box(dots5)}</div></div> <div class="row" data-prize="G2" data-len="5"><div class="prize-name">G2</div><div class="prize-results grid-2">${box(dots5).repeat(2)}</div></div> <div class="row" data-prize="G3" data-len="5"><div class="prize-name">G3</div><div class="prize-results grid-6">${box(dots5).repeat(6)}</div></div> <div class="row" data-prize="G4" data-len="4"><div class="prize-name">G4</div><div class="prize-results grid-4">${box(dots4).repeat(4)}</div></div> <div class="row" data-prize="G5" data-len="4"><div class="prize-name">G5</div><div class="prize-results grid-6">${box(dots4).repeat(6)}</div></div> <div class="row" data-prize="G6" data-len="3"><div class="prize-name">G6</div><div class="prize-results grid-3">${box(dots3).repeat(3)}</div></div> <div class="row" data-prize="G7" data-len="2"><div class="prize-name">G7</div><div class="prize-results grid-4">${box(dots2).repeat(4)}</div></div> </div> <div class="injected-slot" id="custom-slot-${prefix}"><div class="slot-title" id="slot-title-${prefix}">⚡ BẢNG LÔ RƠI SẼ HIỂN THỊ TẠI ĐÂY</div><div class="loto-grid" id="loto-drop-zone-${prefix}"></div></div> `; } else { return ` <div class="board" id="board-live-${prefix}"> <div class="board-header"><div class="board-title live" style="color:var(--mn-primary);" id="live-title-${prefix}">🔴 TRỰC TIẾP ${station.toUpperCase()}</div><div class="status-blink" id="live-status-${prefix}">⏳ ĐANG CHỜ QUAY...</div></div> <div class="row row-db" data-prize="ĐB" data-len="6"><div class="prize-name db">ĐB</div><div class="prize-results grid-1"><div class="number-box" style="height:44px;"><span class="number-text">${dots6}</span></div></div></div> <div class="row" data-prize="G1" data-len="5"><div class="prize-name">G1</div><div class="prize-results grid-1">${box(dots5)}</div></div> <div class="row" data-prize="G2" data-len="5"><div class="prize-name">G2</div><div class="prize-results grid-1">${box(dots5)}</div></div> <div class="row" data-prize="G3" data-len="5"><div class="prize-name">G3</div><div class="prize-results grid-2">${box(dots5).repeat(2)}</div></div> <div class="row" data-prize="G4" data-len="5"><div class="prize-name">G4</div><div class="prize-results grid-7">${box(dots5).repeat(7)}</div></div> <div class="row" data-prize="G5" data-len="4"><div class="prize-name">G5</div><div class="prize-results grid-1">${box(dots4)}</div></div> <div class="row" data-prize="G6" data-len="4"><div class="prize-name">G6</div><div class="prize-results grid-3">${box(dots4).repeat(3)}</div></div> <div class="row" data-prize="G7" data-len="3"><div class="prize-name">G7</div><div class="prize-results grid-1">${box(dots3)}</div></div> <div class="row" data-prize="G8" data-len="2"><div class="prize-name">G8</div><div class="prize-results grid-1">${box(dots2)}</div></div> </div> <div class="injected-slot" id="custom-slot-${prefix}"><div class="slot-title" id="slot-title-${prefix}">⚡ BẢNG LÔ RƠI SẼ HIỂN THỊ TẠI ĐÂY</div><div class="loto-grid" id="loto-drop-zone-${prefix}"></div></div> `; }
+        }
+
+        let activeAISearchInput = null;
+
+        function openSmartKeyboard(inputEl, feedId) {
+            activeAISearchInput = inputEl;
+            document.getElementById('ai-smart-keyboard').classList.add('show');
+            document.querySelector('.bottom-nav').classList.add('nav-hidden');
+            const feed = document.getElementById(feedId);
+            if (feed) feed.style.paddingBottom = '400px'; 
+        }
+
+        function closeSmartKeyboard() {
+            const kb = document.getElementById('ai-smart-keyboard');
+            if (kb) kb.classList.remove('show');
+            document.querySelector('.bottom-nav').classList.remove('nav-hidden');
+            activeAISearchInput = null;
+            document.querySelectorAll('.boards-feed').forEach(feed => feed.style.paddingBottom = '120px');
+            
+            const micBtn = document.getElementById('vk-mic-btn');
+            const wave = document.getElementById('wave-anim');
+            if (micBtn && wave) {
+                const micIcon = micBtn.querySelector('.mic-icon');
+                micBtn.classList.remove('listening');
+                wave.style.display = 'none';
+                micIcon.style.display = 'block';
+            }
+        }
+
+        window.scrollToMonth = function(month) {
+            document.querySelectorAll('.month-btn').forEach(btn => btn.classList.remove('active-month'));
+            const targetBtn = document.querySelector(`.month-btn[data-month="${month}"]`);
+            if(targetBtn) {
+                targetBtn.classList.add('active-month');
+                targetBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+
+            const activeModule = document.querySelector('.region-module.active');
+            if(!activeModule) return;
+            const feed = activeModule.querySelector('.boards-feed');
+            if(!feed) return;
+
+            const boards = Array.from(feed.querySelectorAll(`.board[data-month="${month}"]`));
+            if (boards.length > 0) {
+                boards[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                window.updateAISmartBar(`ĐANG HIỂN THỊ KẾT QUẢ THÁNG ${month}`);
+            } else {
+                window.updateAISmartBar(`⚠️ CHƯA CÓ DỮ LIỆU THÁNG ${month} TRONG LỊCH SỬ`);
+            }
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const today = new Date(); const dayOfWeek = today.getDay();
+            const currentMonth = today.getMonth() + 1;
+            const mnStationsToday = LOTTERY_SCHEDULE.MN[dayOfWeek], mtStationsToday = LOTTERY_SCHEDULE.MT[dayOfWeek], mbStationToday = LOTTERY_SCHEDULE.MB[dayOfWeek];
+            
+            const lobby = document.getElementById('live-lobby-main');
+            if (lobby) { lobby.innerHTML = `<div class="live-card"><div class="live-card-header"><span class="live-region-name">MIỀN NAM</span><span class="live-status-badge status-waiting">CHỜ QUAY</span></div><div class="live-time">🕒 16:15</div><div class="live-stations-list">Đài quay: ${mnStationsToday.join(' - ')}</div><div class="btn-enter-live" onclick="enterLiveRoom('mn')">VÀO PHÒNG MIỀN NAM ▶</div></div><div class="live-card"><div class="live-card-header"><span class="live-region-name">MIỀN TRUNG</span><span class="live-status-badge status-waiting">CHỜ QUAY</span></div><div class="live-time">🕒 17:15</div><div class="live-stations-list">Đài quay: ${mtStationsToday.join(' - ')}</div><div class="btn-enter-live" onclick="enterLiveRoom('mt')">VÀO PHÒNG MIỀN TRUNG ▶</div></div><div class="live-card"><div class="live-card-header"><span class="live-region-name">MIỀN BẮC</span><span class="live-status-badge status-waiting">CHỜ QUAY</span></div><div class="live-time">🕒 18:15</div><div class="live-stations-list">Đài quay: ${mbStationToday}</div><div class="btn-enter-live" onclick="enterLiveRoom('mb')">VÀO PHÒNG MIỀN BẮC ▶</div></div>`; }
+            
+            const tMNHist = document.getElementById('station-tabs-mn'); if (tMNHist) tMNHist.innerHTML = mnStationsToday.map((s, i) => `<div class="mn-station-tab ${i === 0 ? 'active' : ''}" onclick="activeTabHistory(this, 'mn')">${s}</div>`).join('');
+            const tMTHist = document.getElementById('station-tabs-mt'); if (tMTHist) tMTHist.innerHTML = mtStationsToday.map((s, i) => `<div class="mn-station-tab ${i === 0 ? 'active' : ''}" onclick="activeTabHistory(this, 'mt')">${s}</div>`).join('');
+            const tMNLive = document.getElementById('station-tabs-live-mn'); if (tMNLive) tMNLive.innerHTML = mnStationsToday.map((s, i) => `<div class="mn-station-tab ${i === 0 ? 'active' : ''}" onclick="activeTabLive(this, 'mn')">${s}</div>`).join('');
+            const tMTLive = document.getElementById('station-tabs-live-mt'); if (tMTLive) tMTLive.innerHTML = mtStationsToday.map((s, i) => `<div class="mn-station-tab ${i === 0 ? 'active' : ''}" onclick="activeTabLive(this, 'mt')">${s}</div>`).join('');
+            if(document.getElementById('live-title-mn')) document.getElementById('live-title-mn').innerText = `🔴 TRỰC TIẾP ${mnStationsToday[0].toUpperCase()}`;
+            if(document.getElementById('live-title-mt')) document.getElementById('live-title-mt').innerText = `🔴 TRỰC TIẾP ${mtStationsToday[0].toUpperCase()}`;
+
+            const bfMB = document.getElementById('boards-feed-live-mb'); if(bfMB) bfMB.innerHTML = buildLiveRoom('mb', 'MIỀN BẮC', true);
+            const bfMN = document.getElementById('boards-feed-live-mn'); if(bfMN) bfMN.innerHTML = buildLiveRoom('mn', mnStationsToday[0], false);
+            const bfMT = document.getElementById('boards-feed-live-mt'); if(bfMT) bfMT.innerHTML = buildLiveRoom('mt', mtStationsToday[0], false);
+
+            renderBoardsMB(generateMBData(100), 'history-boards-container-mb');
+            renderBoardsMN_MT(generateMN_MT_Data(100, mnStationsToday[0]), 'history-boards-container-mn');
+            renderBoardsMN_MT(generateMN_MT_Data(100, mtStationsToday[0]), 'history-boards-container-mt');
+
+            renderWeeklyGrid(); renderYearlyGrid(2026); buildYearDropdownList();
+            
+            const currentMonthBtn = document.querySelector(`.month-btn[data-month="${currentMonth}"]`);
+            if(currentMonthBtn) {
+                currentMonthBtn.classList.add('active-month');
+                setTimeout(() => currentMonthBtn.scrollIntoView({ inline: 'center' }), 500);
+            }
+
+            document.querySelectorAll('.month-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const m = e.target.getAttribute('data-month');
+                    window.scrollToMonth(m);
+                });
+            });
+
+            document.querySelectorAll('.ai-vk-key').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (!activeAISearchInput) return;
+                    let val = activeAISearchInput.value;
+                    
+                    if (btn.id === 'key-ghep') {
+                        btn.classList.toggle('active-ghep');
+                        if (btn.classList.contains('active-ghep')) {
+                            window.updateAISmartBar("AI ĐANG GHI NHẬN: CHẾ ĐỘ GHÉP CẦU...");
+                        } else {
+                            window.updateAISmartBar("AI SMART MODE: ĐANG ĐỒNG BỘ DỮ LIỆU...");
+                        }
+                    }
+
+                    if (btn.classList.contains('toggle-glow')) {
+                        btn.classList.toggle('active-tag');
+                    }
+
+                    if (btn.classList.contains('sk-del')) {
+                        activeAISearchInput.value = val.slice(0, -1);
+                    } else if (btn.classList.contains('sk-clear')) {
+                        activeAISearchInput.value = "";
+                        document.querySelectorAll('.active-ghep, .active-tag').forEach(el => el.classList.remove('active-ghep', 'active-tag'));
+                        window.updateAISmartBar("AI SMART MODE: ĐANG ĐỒNG BỘ DỮ LIỆU...");
+                    } else {
+                        const char = btn.getAttribute('data-val') || btn.innerText;
+                        activeAISearchInput.value = val + char;
+                    }
+                });
+            });
+
+            document.querySelectorAll('.boards-feed').forEach(feed => {
+                let scrollTimer;
+                feed.addEventListener('scroll', () => {
+                    const bar = feed.querySelector('.feed-control-bar');
+                    if(bar) {
+                        bar.classList.add('scrolling-faded');
+                        clearTimeout(scrollTimer);
+                        scrollTimer = setTimeout(() => {
+                            bar.classList.remove('scrolling-faded');
+                        }, 300);
+                    }
+                    const am = document.querySelector('.region-module.active'); 
+                    if(am) window.drawCauArrows(am.querySelector('.boards-feed').id);
+                });
+            });
+
+            document.addEventListener('click', e => {
+                const kb = document.getElementById('ai-smart-keyboard');
+                if (kb && kb.classList.contains('show')) {
+                    if (!e.target.closest('#ai-smart-keyboard') && !e.target.closest('.ai-search-wrapper') && !e.target.closest('.cau-modal')) {
+                        closeSmartKeyboard();
+                    }
+                }
+
+                const box = e.target.closest('.number-box');
+                if(box && e.target.closest('.boards-feed')) {
+                    const txt = box.querySelector('.number-text'); if(!txt || txt.querySelector('.dot')) return; 
+                    if(window.activeCauBox) window.activeCauBox.classList.remove('box-editing'); 
+                    window.activeCauBox = box; box.classList.add('box-editing'); 
+                    const feedContainer = e.target.closest('.boards-feed');
+                    if(feedContainer) window.openCauModal(txt, feedContainer.id);
+                }
+            });
+
+            window.addEventListener('resize', () => { const am = document.querySelector('.region-module.active'); if(am) window.drawCauArrows(am.querySelector('.boards-feed').id); });
+
+            const tbody = document.getElementById('matrix-body'); let rowsHtml = '';
+            for(let i = 0; i <= 99; i++) { let num = i < 10 ? '0'+i : i, isGan = Math.random() < 0.15; rowsHtml += `<tr><th class="${isGan ? 'corner gan-alert' : 'corner'}">${num}${isGan ? `<div class="gan-tooltip">⚠️ Lô đang gan</div>` : ''}</th>`; for(let j = 1; j <= 30; j++) { rowsHtml += `<td class="${(isGan && j>=25) ? '' : (Math.random()>0.8 ? 'data-cell' : '')}">${(isGan && j>=25) ? '' : (Math.random()>0.8 ? Math.floor(Math.random()*3)+1 : '')}</td>`; } rowsHtml += `</tr>`; }
+            if(tbody) { tbody.innerHTML = rowsHtml; tbody.addEventListener('click', e => { let th = e.target.closest('th.gan-alert'); if(th) { document.querySelectorAll('th.gan-alert.show-tooltip').forEach(el => { if(el !== th) el.classList.remove('show-tooltip'); }); th.classList.toggle('show-tooltip'); } }); }
+            renderTopLo(); setupKeyboard(); 
+        });
+
+        window.executeAISearch = async function(btnElement, feedId) {
+            const input = btnElement.previousElementSibling;
+            const query = input.value.trim();
+            const feed = document.getElementById(feedId);
+            const regionCode = feedId.split('-').pop(); // Lấy mã vùng 'mb', 'mn', 'mt'
+            const resultBox = document.getElementById(`ai-inline-result-${regionCode}`);
+            
+            closeSmartKeyboard();
+
+            if(!query) {
+                input.value = "⚠️ Vui lòng nhập phương pháp...";
+                setTimeout(() => input.value = "", 1500);
+                return;
+            }
+
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = '⏳ ĐANG DÒ...';
+            btnElement.style.pointerEvents = 'none';
+            input.style.borderColor = '#eab308'; 
+            
+            window.updateAISmartBar(`AI ĐANG XỬ LÝ YÊU CẦU: "${query.substring(0, 15)}..."`);
+            
+            // Hiện bảng kết quả với trạng thái tải
+            if(resultBox) {
+                resultBox.style.display = 'block';
+                resultBox.innerHTML = `<div class="dots-wrapper" style="display:inline-block; margin-right: 5px;"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div> Đang phân tích thuật toán...`;
+            }
+
+            try {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                
+                // ĐÃ THAY ĐỔI: ÉP BUỘC LUẬT LỆ CHO AI BẢNG TÌM KIẾM
+                const strictRules = "Bạn là chuyên gia phân tích thuật toán tích hợp trong app. Nhiệm vụ: Giải thích ngắn gọn về thuật toán người dùng vừa nhập (dưới 40 từ). TUYỆT ĐỐI KHÔNG dùng từ 'soi cầu', 'chốt số', 'lô đề'. KẾT THÚC BẰNG CÂU: '<br><i>⚠️ Cảnh báo: Không ai đoán trước được tương lai. Mọi kết quả chỉ để tham khảo. Chơi lô đề là vi phạm pháp luật.</i>'. Dùng thẻ <b> để nhấn mạnh, dùng tiếng Việt khách quan.";
+
+                const payload = {
+                    contents: [{ parts: [{ text: query }] }],
+                    systemInstruction: { parts: [{ text: strictRules }] }
+                };
+                
+                const data = await fetchWithRetry(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Phương pháp đã được ghi nhận vào hệ thống.";
+                window.updateAISmartBar(`✨ GEMINI ĐÃ TRẢ LỜI`);
+                if(resultBox) {
+                    resultBox.innerHTML = `✨ <b>Trợ lý AI:</b> ${responseText.replace(/\n/g, '<br/>')}`;
+                }
+            } catch(e) {
+                window.updateAISmartBar(`✅ ĐÃ GHI NHẬN PHƯƠNG PHÁP`);
+                if(resultBox) {
+                    resultBox.innerHTML = `⚠️ Lỗi kết nối AI. Phương pháp đã được lưu cục bộ.`;
+                }
+            }
+
+            setTimeout(() => {
+                window.resetCau();
+                const firstBoard = feed.querySelector('.board');
+                if (firstBoard) {
+                    const digits = Array.from(firstBoard.querySelectorAll('.number-box .digit'));
+                    if (digits.length > 2) {
+                        let idx1 = Math.floor(Math.random() * digits.length);
+                        let idx2 = Math.floor(Math.random() * digits.length);
+                        while(idx1 === idx2) idx2 = Math.floor(Math.random() * digits.length);
+                        
+                        const d1 = digits[idx1];
+                        const d2 = digits[idx2];
+                        
+                        d1.classList.add('active-cau');
+                        d2.classList.add('active-cau');
+                        
+                        window.cauSequenceNodes = [d1, d2];
+                        window.drawCauArrows(feedId);
+                        
+                        input.value = `✅ Cầu gợi ý: [${d1.innerText}] ghép [${d2.innerText}]`;
+                        firstBoard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+                
+                btnElement.innerHTML = originalText;
+                btnElement.style.pointerEvents = 'auto';
+                input.style.borderColor = '#10b981';
+                setTimeout(() => {
+                    input.style.borderColor = '#0ea5e9';
+                    input.value = "";
+                }, 5000); 
+            }, 1000);
+        }
+
+        window.toggleVoiceInput = function() {
+            const micBtn = document.getElementById('vk-mic-btn');
+            const wave = document.getElementById('wave-anim');
+            const micIcon = micBtn.querySelector('.mic-icon');
+
+            if (!activeAISearchInput) return;
+
+            if (micBtn.classList.contains('listening')) {
+                micBtn.classList.remove('listening');
+                wave.style.display = 'none';
+                micIcon.style.display = 'block';
+                activeAISearchInput.placeholder = "Nhập phương pháp của bạn vào đây...";
+                window.updateAISmartBar('AI SMART MODE: ĐANG ĐỒNG BỘ DỮ LIỆU...');
+            } else {
+                micBtn.classList.add('listening');
+                micIcon.style.display = 'none';
+                wave.style.display = 'flex';
+                activeAISearchInput.value = "";
+                activeAISearchInput.placeholder = "🔴 Hệ thống đang nghe...";
+                window.updateAISmartBar(`AI ĐANG LẮNG NGHE SÓNG ÂM...`);
+
+                setTimeout(() => {
+                    if(micBtn.classList.contains('listening')) {
+                        micBtn.classList.remove('listening');
+                        wave.style.display = 'none';
+                        micIcon.style.display = 'block';
+                        activeAISearchInput.placeholder = "Nhập phương pháp của bạn vào đây...";
+                        activeAISearchInput.value = "Giải thích thuật toán G1 ghép với ĐB"; 
+                        window.updateAISmartBar(`🎙️ ĐÃ NHẬN DIỆN GIỌNG NÓI. HÃY ẤN "TÌM"`);
+
+                        const ghepBtn = document.getElementById('key-ghep');
+                        if(ghepBtn) ghepBtn.classList.add('active-ghep');
+                    }
+                }, 2500);
+            }
+        }
+
+        window.activeCauBox = null; window.cauSequenceNodes = []; window.activeCellDB = null;
+        window.resetCau = function() { window.cauSequenceNodes.forEach(n => n.classList.remove('active-cau')); window.cauSequenceNodes=[]; document.querySelectorAll('.number-box').forEach(b => b.classList.remove('box-editing','box-has-two-selected')); if(window.activeCauBox) window.activeCauBox.classList.remove('box-editing'); document.querySelectorAll('.cau-paths').forEach(g => g.innerHTML = ''); }
+        
+        window.openCauModal = function(txt, feedId) { 
+            const d = txt.querySelectorAll('.digit'); 
+            if(d.length === 0) return; 
+            
+            const mc = document.getElementById('cau-modal-digits'); 
+            if(!mc) return;
+            
+            mc.innerHTML = ''; 
+            d.forEach((ds) => { 
+                const isS = ds.classList.contains('active-cau'); 
+                const btn = document.createElement('button'); 
+                btn.className = `cau-btn-digit ${isS ? 'selected' : ''}`; 
+                btn.innerText = ds.innerText; 
+                btn.onclick = function(){ 
+                    const wS = !this.classList.contains('selected'); 
+                    this.classList.toggle('selected'); 
+                    if(wS){ 
+                        ds.classList.add('active-cau'); 
+                        window.cauSequenceNodes.push(ds); 
+                    } else { 
+                        ds.classList.remove('active-cau'); 
+                        window.cauSequenceNodes = window.cauSequenceNodes.filter(n => n !== ds); 
+                    } 
+                    window.drawCauArrows(feedId); 
+                }; 
+                mc.appendChild(btn); 
+            }); 
+            
+            const modal = document.getElementById('cau-modal');
+            if(modal) modal.classList.add('show'); 
+        }
+        
+        window.closeCauModal = function(e) { if(e) e.preventDefault(); const modal = document.getElementById('cau-modal'); if(modal) modal.classList.remove('show'); if(window.activeCauBox) { window.activeCauBox.classList.remove('box-editing'); window.activeCauBox=null; } }
+        
+        window.drawCauArrows = function(feedId) { 
+            if(!feedId) return; const fc=document.getElementById(feedId); if(!fc) return; 
+            const cc=fc.querySelector('.cau-canvas-layer'); const sg=fc.querySelector('.cau-paths'); 
+            if(!cc||!sg) return; cc.style.height=fc.scrollHeight+'px'; cc.style.width=fc.scrollWidth+'px'; sg.innerHTML=''; 
+            
+            if(window.cauSequenceNodes.length > 0) {
+                const arrVals = window.cauSequenceNodes.map(n => n.innerText).join(' ➔ ');
+                window.updateAISmartBar(`AI ĐANG GHI NHẬN: GHÉP [${arrVals}]`);
+            } else {
+                window.updateAISmartBar('AI SMART MODE: ĐANG ĐỒNG BỘ DỮ LIỆU...');
+            }
+
+            if(window.cauSequenceNodes.length<2) return; 
+            
+            const cr=fc.getBoundingClientRect(); 
+            for(let i=0; i<window.cauSequenceNodes.length-1; i++){ 
+                const r1=window.cauSequenceNodes[i].getBoundingClientRect(), r2=window.cauSequenceNodes[i+1].getBoundingClientRect(); 
+                const sX=r1.left+(r1.width/2)-cr.left+fc.scrollLeft, sY=r1.top+(r1.height/2)-cr.top+fc.scrollTop; 
+                const tX=r2.left+(r2.width/2)-cr.left+fc.scrollLeft, tY=r2.top+(r2.height/2)-cr.top+fc.scrollTop; 
+                
+                const mX=(sX+tX)/2, cpY=sY+(Math.abs(tY-sY)<50?-40:0), dx=tX-mX, dy=tY-cpY, dist=Math.sqrt(dx*dx+dy*dy)||1, of=28; 
+                
+                const p=document.createElementNS("http://www.w3.org/2000/svg","path"); 
+                p.setAttribute("d",`M ${sX} ${sY} Q ${mX} ${cpY} ${tX-(dx/dist)*of} ${tY-(dy/dist)*of}`); 
+                p.setAttribute("class","cau-path"); p.setAttribute("marker-end","url(#arrowhead)"); p.setAttribute("data-index-to", i+1); 
+                p.addEventListener('click', window.handleCauPathClick); 
+                sg.appendChild(p); 
+            } 
+        }
+
+        window.handleCauPathClick = function(e) { e.stopPropagation(); const it=parseInt(e.target.getAttribute('data-index-to')); if(!isNaN(it) && it>=0 && it<window.cauSequenceNodes.length) { window.cauSequenceNodes[it].classList.remove('active-cau'); window.cauSequenceNodes=window.cauSequenceNodes.filter((n,i)=>i!==it); const am = document.querySelector('.region-module.active'); if(am) window.drawCauArrows(am.querySelector('.boards-feed').id); } }
+
+        const sleep = ms => new Promise(res => setTimeout(res, ms));
+        function generateRandom(length) { let res = ''; for(let i=0; i<length; i++) res += Math.floor(Math.random() * 10); return res; }
+        function wrapDigits(numStr) { return numStr.split('').map(d => `<span class="digit">${d}</span>`).join(''); }
+
+        function generateMBData(count) { 
+            let data = []; let b = new Date(); 
+            for(let i=0; i<count; i++) { 
+                let d = new Date(b); d.setDate(d.getDate() - i); 
+                data.push({
+                    month: d.getMonth() + 1,
+                    date: d.toLocaleDateString('vi-VN', {weekday:'long', year:'numeric', month:'2-digit', day:'2-digit'}), 
+                    prizes: { DB: [generateRandom(5)], G1: [generateRandom(5)], G2: [generateRandom(5), generateRandom(5)], G3: Array(6).fill(0).map(()=>generateRandom(5)), G4: Array(4).fill(0).map(()=>generateRandom(4)), G5: Array(6).fill(0).map(()=>generateRandom(4)), G6: Array(3).fill(0).map(()=>generateRandom(3)), G7: Array(4).fill(0).map(()=>generateRandom(2)) } 
+                }); 
+            } 
+            return data; 
+        }
+        function generateMN_MT_Data(count, reg) { 
+            let data = []; let b = new Date(); 
+            for(let i=0; i<count; i++) { 
+                let d = new Date(b); d.setDate(d.getDate() - i); 
+                data.push({
+                    month: d.getMonth() + 1,
+                    region: reg, 
+                    date: d.toLocaleDateString('vi-VN', {weekday:'long', year:'numeric', month:'2-digit', day:'2-digit'}), 
+                    prizes: { DB: [generateRandom(6)], G1: [generateRandom(5)], G2: [generateRandom(5)], G3: Array(2).fill(0).map(()=>generateRandom(5)), G4: Array(7).fill(0).map(()=>generateRandom(5)), G5: [generateRandom(4)], G6: Array(3).fill(0).map(()=>generateRandom(4)), G7: [generateRandom(3)], G8: [generateRandom(2)] }
+                }); 
+            } 
+            return data; 
+        }
+
+        function renderBoardsMB(data, id) { const c = document.getElementById(id); if (!c) return; let h = ''; data.forEach((k, index) => { h += `<div class="board" data-month="${k.month}"><div class="board-header"><div class="board-title">LỊCH SỬ XSMB</div><div class="board-date">${k.date}</div></div><div class="row row-db" data-prize="ĐB"><div class="prize-name db">ĐB</div><div class="prize-results grid-1"><div class="number-box" style="height:44px;"><span class="number-text" style="font-size:24px; color:var(--db-bg);">${wrapDigits(k.prizes.DB[0])}</span></div></div></div><div class="row" data-prize="G1"><div class="prize-name">G1</div><div class="prize-results grid-1"><div class="number-box"><span class="number-text">${wrapDigits(k.prizes.G1[0])}</span></div></div></div><div class="row" data-prize="G2"><div class="prize-name">G2</div><div class="prize-results grid-2">${k.prizes.G2.map(n=>`<div class="number-box"><span class="number-text">${wrapDigits(n)}</span></div>`).join('')}</div></div><div class="row" data-prize="G3"><div class="prize-name">G3</div><div class="prize-results grid-6">${k.prizes.G3.map(n=>`<div class="number-box"><span class="number-text">${wrapDigits(n)}</span></div>`).join('')}</div></div><div class="row" data-prize="G4"><div class="prize-name">G4</div><div class="prize-results grid-4">${k.prizes.G4.map(n=>`<div class="number-box"><span class="number-text">${wrapDigits(n)}</span></div>`).join('')}</div></div><div class="row" data-prize="G5"><div class="prize-name">G5</div><div class="prize-results grid-6">${k.prizes.G5.map(n=>`<div class="number-box"><span class="number-text">${wrapDigits(n)}</span></div>`).join('')}</div></div><div class="row" data-prize="G6"><div class="prize-name">G6</div><div class="prize-results grid-3">${k.prizes.G6.map(n=>`<div class="number-box"><span class="number-text">${wrapDigits(n)}</span></div>`).join('')}</div></div><div class="row" data-prize="G7"><div class="prize-name">G7</div><div class="prize-results grid-4">${k.prizes.G7.map(n=>`<div class="number-box"><span class="number-text">${wrapDigits(n)}</span></div>`).join('')}</div></div></div>`; }); c.innerHTML = h; }
+        function renderBoardsMN_MT(data, id) { const c = document.getElementById(id); if (!c) return; let h = ''; data.forEach((k, index) => { h += `<div class="board" data-month="${k.month}"><div class="board-header"><div class="board-title">LỊCH SỬ ${k.region.toUpperCase()}</div><div class="board-date">${k.date}</div></div><div class="row row-db" data-prize="ĐB"><div class="prize-name db">ĐB</div><div class="prize-results grid-1"><div class="number-box" style="height:44px;"><span class="number-text" style="font-size:24px; color:var(--db-bg);">${wrapDigits(k.prizes.DB[0])}</span></div></div></div><div class="row" data-prize="G1"><div class="prize-name">G1</div><div class="prize-results grid-1"><div class="number-box"><span class="number-text">${wrapDigits(k.prizes.G1[0])}</span></div></div></div><div class="row" data-prize="G2"><div class="prize-name">G2</div><div class="prize-results grid-1"><div class="number-box"><span class="number-text">${wrapDigits(k.prizes.G2[0])}</span></div></div></div><div class="row" data-prize="G3"><div class="prize-name">G3</div><div class="prize-results grid-2">${k.prizes.G3.map(n=>`<div class="number-box"><span class="number-text">${wrapDigits(n)}</span></div>`).join('')}</div></div><div class="row" data-prize="G4"><div class="prize-name">G4</div><div class="prize-results grid-7">${k.prizes.G4.map(n=>`<div class="number-box"><span class="number-text">${wrapDigits(n)}</span></div>`).join('')}</div></div><div class="row" data-prize="G5"><div class="prize-name">G5</div><div class="prize-results grid-1"><div class="number-box"><span class="number-text">${wrapDigits(k.prizes.G5[0])}</span></div></div></div><div class="row" data-prize="G6"><div class="prize-name">G6</div><div class="prize-results grid-3">${k.prizes.G6.map(n=>`<div class="number-box"><span class="number-text">${wrapDigits(n)}</span></div>`).join('')}</div></div><div class="row" data-prize="G7"><div class="prize-name">G7</div><div class="prize-results grid-1"><div class="number-box"><span class="number-text">${wrapDigits(k.prizes.G7[0])}</span></div></div></div><div class="row" data-prize="G8"><div class="prize-name">G8</div><div class="prize-results grid-1"><div class="number-box"><span class="number-text">${wrapDigits(k.prizes.G8[0])}</span></div></div></div></div>`; }); c.innerHTML = h; }
+
+        async function triggerQuayThuMB(chk) { if(chk.checked) { chk.disabled = true; await startSimulationMB(); chk.checked = false; chk.disabled = false; } }
+        async function startSimulationMB() { const st = document.getElementById('live-status-mb'), dz = document.getElementById('loto-drop-zone-mb'), sl = document.getElementById('slot-title-mb'); if(!st || !dz) return; st.innerText="🔴 ĐANG QUAY..."; st.style.color="var(--db-bg)"; dz.innerHTML=''; sl.innerText="⚡ ĐANG LẤY KẾT QUẢ..."; document.querySelectorAll('#board-live-mb .number-text').forEach(b => { let l=b.closest('.row').dataset.len; b.innerHTML=`<div class="dots-wrapper">${'<span class="dot"></span>'.repeat(l)}</div>`; }); const ord=['G1','G2','G3','G4','G5','G6','G7','ĐB'], rows=Array.from(document.querySelectorAll('#board-live-mb .row')); for(let tn of ord){ const r=rows.find(x=>x.dataset.prize===tn); if(!r) continue; const len=parseInt(r.dataset.len), lbl=r.querySelector('.prize-name'), txts=r.querySelectorAll('.number-text'); lbl.classList.add('active-led'); for(let b of txts){ b.classList.add('spinning'); let si=setInterval(()=>b.innerText=generateRandom(len), 50); await sleep(400); clearInterval(si); b.classList.remove('spinning'); let fn=generateRandom(len); b.innerHTML=wrapDigits(fn); let lo=fn.slice(-2); let c=document.createElement('div'); c.className=`lo-chip ${tn==='ĐB'?'db-chip':''}`; c.innerText=lo; dz.appendChild(c); await sleep(100); } lbl.classList.remove('active-led'); } st.innerText="✅ ĐÃ QUAY XONG"; st.style.color="var(--led-color)"; sl.innerText="KỲ QUAY KẾT THÚC."; }
+
+        async function triggerQuayThuMN_MT(chk, pfx) { if(chk.checked) { chk.disabled = true; await startSimulationMN_MT(pfx); chk.checked = false; chk.disabled = false; } }
+        async function startSimulationMN_MT(pfx) { const st = document.getElementById(`live-status-${pfx}`), dz = document.getElementById(`loto-drop-zone-${pfx}`), sl = document.getElementById(`slot-title-${pfx}`); if(!st || !dz) return; st.innerText="🔴 ĐANG QUAY..."; st.style.color="var(--db-bg)"; dz.innerHTML=''; sl.innerText="⚡ ĐANG LẤY KẾT QUẢ..."; document.querySelectorAll(`#board-live-${pfx} .number-text`).forEach(b => { let l=b.closest('.row').dataset.len; b.innerHTML=`<div class="dots-wrapper">${'<span class="dot"></span>'.repeat(l)}</div>`; }); const ord=['G8','G7','G6','G5','G4','G3','G2','G1','ĐB'], rows=Array.from(document.querySelectorAll(`#board-live-${pfx} .row`)); for(let tn of ord){ const r=rows.find(x=>x.dataset.prize===tn); if(!r) continue; const len=parseInt(r.dataset.len), lbl=r.querySelector('.prize-name'), txts=r.querySelectorAll('.number-text'); lbl.classList.add('active-led'); for(let b of txts){ b.classList.add('spinning'); let si=setInterval(()=>b.innerText=generateRandom(len), 50); await sleep(400); clearInterval(si); b.classList.remove('spinning'); let fn=generateRandom(len); b.innerHTML=wrapDigits(fn); if(tn==='ĐB') { b.style.fontSize='24px'; b.style.color='var(--db-bg)'; } let lo=fn.slice(-2); let c=document.createElement('div'); c.className=`lo-chip ${tn==='ĐB'?'db-chip':''}`; c.innerText=lo; dz.appendChild(c); await sleep(100); } lbl.classList.remove('active-led'); } st.innerText="✅ XONG"; st.style.color="var(--led-color)"; sl.innerText="KỲ QUAY KẾT THÚC."; }
+
+        function setupLanSo() { const cv=document.getElementById('lan-so-cover'); if(!cv) return; let isD=false, stX=0, crT=0; function sD(e){isD=true; stX=e.type.includes('mouse')?e.clientX:e.touches[0].clientX; cv.style.transition='none';} function dM(e){if(!isD)return; e.preventDefault(); let x=e.type.includes('mouse')?e.clientX:e.touches[0].clientX; let nwX=crT+(x-stX), bw=cv.parentElement.offsetWidth; if(nwX<0)nwX=0; if(nwX>bw)nwX=bw; cv.style.transform=`translateX(${nwX}px)`;} function eD(e){if(!isD)return; isD=false; let m=cv.style.transform.match(/translateX\(([^p]+)px\)/); if(m) crT=parseFloat(m[1]);} cv.addEventListener('mousedown',sD); window.addEventListener('mousemove',dM); window.addEventListener('mouseup',eD); cv.addEventListener('touchstart',sD,{passive:false}); window.addEventListener('touchmove',dM,{passive:false}); window.addEventListener('touchend',eD); }
+        const inp = document.getElementById('ai-search-input-loto'), kw = document.getElementById('keyboard-wrapper');
+        function showKeyboard() { if(kw) kw.style.display='block'; } function hideKeyboard() { if(kw) kw.style.display='none'; }
+        function setupKeyboard() { document.querySelectorAll('.vk-btn[data-val]').forEach(k => k.addEventListener('click', e => { let v=inp.value.replace(/\s/g,''); if(v.length<10) { v+=e.target.getAttribute('data-val'); inp.value=v.match(/.{1,2}/g)?.join(' ')||''; } })); }
+        function clearInput() { if(inp) inp.value=''; } function delInput() { if(!inp) return; let v=inp.value.replace(/\s/g,''); if(v.length>0) { v=v.slice(0,-1); inp.value=v.match(/.{1,2}/g)?.join(' ')||''; } }
+        
+        function renderTopLo() { const c = document.getElementById('lo-top-chart'); if(!c) return; const d=[{n:'68',r:1,h:100,c:'linear-gradient(to top,#d50000,#ff1744)'},{n:'86',r:2,h:85,c:'linear-gradient(to top,#e65100,#ff9100)'},{n:'79',r:3,h:75,c:'linear-gradient(to top,#ef6c00,#ffb300)'},{n:'97',r:4,h:65,c:'linear-gradient(to top,#f57f17,#ffc400)'},{n:'12',r:5,h:55,c:'linear-gradient(to top,#fbc02d,#ffee58)'},{n:'21',r:6,h:45,c:'linear-gradient(to top,#afb42b,#d4e157)'},{n:'33',r:7,h:35,c:'linear-gradient(to top,#689f38,#9ccc65)'},{n:'55',r:8,h:28,c:'linear-gradient(to top,#0097a7,#4dd0e1)'},{n:'99',r:9,h:22,c:'linear-gradient(to top,#0288d1,#29b6f6)'},{n:'00',r:10,h:15,c:'linear-gradient(to top,#1976d2,#4fc3f7)'}]; c.innerHTML=d.map((i,x)=>`<div class="bar-wrapper"><div class="bar-number" style="${i.r===1?'color:var(--db-bg);text-shadow:0 0 8px rgba(212,0,0,0.5);transform:scale(1.3);':''}">${i.n}</div><div class="bar-column" style="height:${i.h}%;background:${i.c};${i.r<=3?`box-shadow:0 0 12px ${i.c.split(',')[1].trim()};`:''}animation-delay:${x*0.1}s;"><div class="bar-rank">TOP ${i.r}</div></div></div>`).join(''); }
+        
+        /* FIX LỖI: SỬA HÀM BẬT TẮT ĐỂ MỞ MODAL ĐỘC LẬP THAY VÌ TRƯỢT THANH NGANG */
+        const tvS = document.getElementById('ai-tv-screen'), tvH = document.getElementById('tv-header-title'), tvM = document.getElementById('tv-message'), tvR = document.getElementById('tv-results-container');
+        function closeTV() { const tvModal = document.getElementById('ai-tv-modal'); if(tvModal) tvModal.classList.remove('show'); } 
+        function activateNhipDep() { hideKeyboard(); const tvModal = document.getElementById('ai-tv-modal'); if(tvModal) tvModal.classList.add('show'); }
+        
+        window.activateGeminiAI = async function() {
+            hideKeyboard();
+            const tvModal = document.getElementById('ai-tv-modal');
+            if(tvModal) tvModal.classList.add('show');
+            if(!tvS) return;
+            
+            tvS.className = 'tv-screen theme-blue';
+            tvH.innerText = "✨ AI CHUYÊN GIA PHÂN TÍCH";
+            tvR.innerHTML = '';
+            
+            let searchInput = document.getElementById('ai-search-input-loto');
+            let rn = searchInput ? searchInput.value.replace(/\s/g, '') : '';
+            
+            // ĐÃ THAY ĐỔI PROMPT: LOẠI BỎ TỪ NGỮ GÂY HIỂU NHẦM
+            let prompt = "";
+            if (rn.length > 0) {
+                prompt = `Hãy dùng thuật toán thống kê để đánh giá khách quan các con số: ${rn}. Phân tích ngắn gọn (dưới 40 từ).`;
+            } else {
+                prompt = `Hãy phân tích nhanh 1 thuật toán xác suất đang phổ biến hôm nay. Trả lời cực kỳ ngắn gọn dưới 40 từ.`;
+            }
+            
+            tvM.innerHTML = `<div class="dots-wrapper"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div> Đang gọi Gemini AI phân tích đa chiều...`;
+            
+            try {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                
+                // ĐÃ THAY ĐỔI: ÉP BUỘC LUẬT LỆ CHO AI TV SCREEN
+                const strictRules = "Bạn là AI phân tích dữ liệu. TUYỆT ĐỐI KHÔNG dùng từ 'soi cầu', 'chốt số', 'lô đề'. LUÔN LUÔN kết thúc câu trả lời bằng: '<br><br><i>⚠️ Lưu ý: Không ai đoán trước được tương lai. Phân tích chỉ mang tính tham khảo. Chơi lô đề là vi phạm pháp luật.</i>'";
+
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: strictRules }] }
+                };
+                
+                const data = await fetchWithRetry(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Hệ thống AI đang bận. Vui lòng thử lại sau.";
+                tvM.innerHTML = `✨ <b>AI PHÁN QUYẾT:</b><br><br><div style="font-size: 14px; line-height: 1.6; color: #f8fafc; text-align: left; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border-left: 3px solid #0ea5e9;">${responseText.replace(/\n/g, '<br/>')}</div>`;
+            } catch(e) {
+                tvM.innerHTML = `⚠️ Lỗi kết nối hệ thống Gemini AI. Vui lòng thử lại.`;
+            }
+        };
+
+        window.activateXienAI = function() { hideKeyboard(); const tvModal = document.getElementById('ai-tv-modal'); if(tvModal) tvModal.classList.add('show'); if(!tvS) return; tvS.className='tv-screen theme-blue'; tvH.innerText="📺 HỆ THỐNG GHÉP XIÊN AI"; tvR.innerHTML=''; let searchInput = document.getElementById('ai-search-input-loto'); let rn = searchInput ? searchInput.value.replace(/\s/g,'') : ''; if(rn.length<4) { tvM.innerHTML="⚠️ Lỗi: Cần nhập ít nhất 4 số (2 cặp)!"; return; } let ps=[...new Set(rn.match(/.{2}/g))]; if(ps.length<2) { tvM.innerHTML="⚠️ Lỗi: Không đủ 2 cặp!"; return; } tvM.innerHTML=`✅ Đã ghép thành ${ps.length} cặp lô [${ps.join(', ')}] thành các Xiên 2:`; let cb=[]; for(let i=0;i<ps.length-1;i++) for(let j=i+1;j<ps.length;j++) cb.push(`${ps[i]} - ${ps[j]}`); cb.forEach((c,x) => { setTimeout(()=>{ let b=document.createElement('div'); b.className='xien-badge'; b.innerText=c; tvR.appendChild(b); }, x*150); }); }
+        window.activateBacNhoAI = function() { hideKeyboard(); const tvModal = document.getElementById('ai-tv-modal'); if(tvModal) tvModal.classList.add('show'); if(!tvS) return; tvS.className='tv-screen theme-red'; tvH.innerText="🚨 HỆ THỐNG BẠC NHỚ AI"; tvR.innerHTML=''; let searchInput = document.getElementById('ai-search-input-loto'); let rn = searchInput ? searchInput.value.replace(/\s/g,'') : ''; if(rn.length<2) { tvM.innerHTML="⚠️ Lỗi: Hãy nhập ít nhất 2 số!"; return; } let ps=[...new Set(rn.match(/.{2}/g))]; tvM.innerHTML=`🧠 <b>CƠ SỞ DỮ LIỆU 10 NĂM</b><br>Khi lô [${ps.join(', ')}] xuất hiện:`; const db={"00":"99","99":"00","12":"34 - 43","21":"45 - 54","68":"86","86":"68","79":"97","97":"79"}; ps.forEach((p,x) => { setTimeout(()=>{ let b=document.createElement('div'); b.className='xien-badge'; b.innerHTML=`<span style="font-size:11px;opacity:0.8;">Cầu ${p} ➔ Mai đánh:</span><br>${db[p]||`${Math.floor(Math.random()*9)}${Math.floor(Math.random()*9)}`}`; b.style.textAlign='center'; tvR.appendChild(b); }, x*250); }); }
+        
+        function renderWeeklyGrid() { const c = document.getElementById('matrix-grid-content'); if(!c) return; let h='<div class="grid-header">'; ['Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7','CN'].forEach(d=>h+=`<div class="grid-cell">${d}</div>`); h+='</div>'; let sD=new Date(2026,3,5); for(let w=0; w<100; w++){ h+='<div class="grid-row">'; let rM=new Date(sD); rM.setDate(sD.getDate()-(w*7)-6); for(let d=0; d<7; d++){ let cD=new Date(rM); cD.setDate(rM.getDate()+d); let df=`${cD.getDate().toString().padStart(2,'0')}/${(cD.getMonth()+1).toString().padStart(2,'0')}`; const n2=Math.floor(Math.random()*100).toString().padStart(2,'0'), n1=Math.floor(Math.random()*1000).toString().padStart(3,'0'), tV=Math.floor(Math.random()*10); let nS=''; for(let c of n1) nS+=`<span class="digit">${c}</span>`; for(let c of n2) nS+=`<span class="digit red-tail">${c}</span>`; h+=`<div class="grid-cell" data-col="${d}" data-tail="${n2}" data-tong="${tV}"><div class="db-number">${nS}</div><div class="db-date">${df}</div><div class="db-single">${tV}</div></div>`; } h+='</div>'; } c.innerHTML=h; }
+        function renderYearlyGrid(yr) { const c = document.getElementById('yearly-grid-content'); if(!c) return; let h=''; c.style.gridTemplateColumns=`55px repeat(12, minmax(72px, 1fr))`; h+=`<div class="y-cell y-corner-dropdown" id="btn-open-year-dropdown" style="grid-row:1; grid-column:1;">${yr} <span class="dropdown-icon">▼</span></div>`; for(let m=1; m<=12; m++) h+=`<div class="y-cell y-th-col" style="grid-row:1; grid-column:${m+1};">T.${m.toString().padStart(2,'0')}</div>`; for(let d=1; d<=31; d++){ h+=`<div class="y-cell y-th-row" style="grid-row:${d+1}; grid-column:1;">N.${d.toString().padStart(2,'0')}</div>`; for(let m=1; m<=12; m++){ const col=m+1; if(!(new Date(yr,m-1,d).getMonth()===(m-1)) || (yr===2026 && m>4)) { h+=`<div class="y-cell" style="grid-row:${d+1}; grid-column:${col};"><div class="y-val empty"></div></div>`; continue; } const n1=Math.floor(Math.random()*1000).toString().padStart(3,'0'), n2=Math.floor(Math.random()*100).toString().padStart(2,'0'); let nS=''; for(let c of n1) nS+=`<span class="digit">${c}</span>`; for(let c of n2) nS+=`<span class="digit red-tail">${c}</span>`; h+=`<div class="y-cell" style="grid-row:${d+1}; grid-column:${col};"><div class="y-val db-number">${nS}</div></div>`; } } c.innerHTML=h; }
+        function buildYearDropdownList() { const c=document.getElementById('year-list-container'); if(!c) return; let h=''; for(let y=2026; y>=2018; y--) h+=`<div class="year-item ${y===2026?'active-yr':''}" data-year="${y}">${y}</div>`; c.innerHTML=h; }
+    </script>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Ráp 2 Không Gian - C2 F12</title>
+  <style>
+    :root {
+      --app-bg: #07111f;
+      --app-panel: #0e1b2f;
+      --app-panel-2: #12243d;
+      --app-border: rgba(148, 163, 184, 0.24);
+      --app-text: #e5eefc;
+      --app-muted: #94a3b8;
+      --app-accent: #38bdf8;
+      --app-accent-2: #facc15;
+      --app-danger: #fb7185;
+      --app-success: #22c55e;
+      --app-radius: 18px;
+      --app-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 32rem),
+        radial-gradient(circle at bottom right, rgba(250, 204, 21, 0.12), transparent 28rem),
+        var(--app-bg);
+      color: var(--app-text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .c2-app-shell {
+      width: min(1180px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 22px 0;
+    }
+
+    .c2-app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px;
+      border: 1px solid var(--app-border);
+      border-radius: var(--app-radius);
+      background: rgba(14, 27, 47, 0.82);
+      box-shadow: var(--app-shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .c2-app-title-group h1 {
+      margin: 0 0 6px;
+      font-size: clamp(22px, 3vw, 34px);
+      letter-spacing: -0.03em;
+    }
+
+    .c2-app-title-group p {
+      margin: 0;
+      color: var(--app-muted);
+      line-height: 1.45;
+    }
+
+    .c2-app-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      background: rgba(34, 197, 94, 0.1);
+      color: #bbf7d0;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    .c2-app-status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--app-success);
+      box-shadow: 0 0 16px rgba(34, 197, 94, 0.8);
+    }
+
+    .c2-app-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .c2-app-sidebar,
+    .c2-app-main {
+      border: 1px solid var(--app-border);
+      border-radius: var(--app-radius);
+      background: rgba(14, 27, 47, 0.78);
+      box-shadow: var(--app-shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .c2-app-sidebar {
+      padding: 14px;
+      align-self: start;
+      position: sticky;
+      top: 14px;
+    }
+
+    .c2-route-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      margin: 0 0 10px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--app-text);
+      cursor: pointer;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    .c2-route-button:hover,
+    .c2-route-button.is-active {
+      border-color: rgba(56, 189, 248, 0.45);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    .c2-route-button small {
+      color: var(--app-muted);
+      display: block;
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+
+    .c2-app-main {
+      min-height: 560px;
+      padding: 18px;
+    }
+
+    .c2-space {
+      display: none;
+      animation: c2FadeIn 180ms ease-out;
+    }
+
+    .c2-space.is-active { display: block; }
+
+    @keyframes c2FadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .c2-space-card {
+      border: 1px solid var(--app-border);
+      border-radius: var(--app-radius);
+      background: linear-gradient(180deg, rgba(18, 36, 61, 0.92), rgba(14, 27, 47, 0.92));
+      overflow: hidden;
+    }
+
+    .c2-space-card-header {
+      padding: 18px;
+      border-bottom: 1px solid var(--app-border);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .c2-space-card-header h2 {
+      margin: 0 0 6px;
+      font-size: clamp(20px, 2.2vw, 28px);
+    }
+
+    .c2-space-card-header p {
+      margin: 0;
+      color: var(--app-muted);
+      line-height: 1.5;
+    }
+
+    .c2-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(250, 204, 21, 0.35);
+      background: rgba(250, 204, 21, 0.1);
+      color: #fef3c7;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .c2-space-body { padding: 18px; }
+
+    .c2-action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .c2-action-button {
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 12px;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--app-text);
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .c2-action-button:hover { background: rgba(56, 189, 248, 0.2); }
+
+    .c2-action-button.is-danger {
+      border-color: rgba(251, 113, 133, 0.4);
+      background: rgba(251, 113, 133, 0.12);
+    }
+
+    .c2-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .c2-info-box {
+      padding: 15px;
+      border: 1px solid var(--app-border);
+      border-radius: 16px;
+      background: rgba(7, 17, 31, 0.46);
+      min-height: 112px;
+    }
+
+    .c2-info-box h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      color: #bae6fd;
+    }
+
+    .c2-info-box p,
+    .c2-info-box li {
+      color: var(--app-muted);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .c2-info-box ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .c2-log {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px dashed rgba(148, 163, 184, 0.3);
+      background: rgba(2, 6, 23, 0.42);
+      color: #cbd5e1;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      min-height: 74px;
+    }
+
+    .c2-link-panel {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      background: rgba(56, 189, 248, 0.08);
+      color: #dbeafe;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 860px) {
+      .c2-app-header { align-items: flex-start; flex-direction: column; }
+      .c2-app-layout { grid-template-columns: 1fr; }
+      .c2-app-sidebar { position: static; }
+      .c2-info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="c2-app-shell" data-c2-app>
+    <header class="c2-app-header">
+      <div class="c2-app-title-group">
+        <h1>App ráp 2 không gian C2 F12</h1>
+        <p>Kiến trúc một shell, nhiều không gian, CSS được cô lập bằng tiền tố <strong>c2-</strong>, JavaScript chỉ chạy trong vùng app.</p>
+      </div>
+      <div class="c2-app-status"><span class="c2-app-status-dot"></span> Hệ thống sẵn sàng</div>
+    </header>
+
+    <div class="c2-app-layout">
+      <nav class="c2-app-sidebar" aria-label="Điều hướng không gian">
+        <button class="c2-route-button is-active" type="button" data-c2-route="xoso">
+          <span>🔴 Kết quả xổ số<br><small>C2 F12 Live</small></span>
+          <span>›</span>
+        </button>
+        <button class="c2-route-button" type="button" data-c2-route="db">
+          <span>📊 Đặc biệt tuần<br><small>Auto cầu space</small></span>
+          <span>›</span>
+        </button>
+      </nav>
+
+      <main class="c2-app-main" id="c2-app-main">
+        <section class="c2-space is-active" data-c2-space="xoso">
+          <article class="c2-space-card">
+            <div class="c2-space-card-header">
+              <div>
+                <h2>Kết Quả Xổ Số Miền Bắc - C2 F12 Live</h2>
+                <p>Không gian hiển thị trạng thái F12 Live, chế độ khán giả tự làm cầu và các lệnh thao tác chính.</p>
+              </div>
+              <span class="c2-badge">F12 Live</span>
+            </div>
+            <div class="c2-space-body">
+              <div class="c2-action-row">
+                <button class="c2-action-button" type="button" data-c2-log="Làm Cầu">Làm Cầu</button>
+                <button class="c2-action-button" type="button" data-c2-log="Quay Thử">Quay Thử</button>
+                <button class="c2-action-button" type="button" data-c2-log="Lặn ĐB">Lặn ĐB</button>
+                <button class="c2-action-button is-danger" type="button" data-c2-clear>Xóa Cầu</button>
+              </div>
+
+              <div class="c2-info-grid">
+                <div class="c2-info-box">
+                  <h3>Trạng thái nguồn</h3>
+                  <ul>
+                    <li>🔴 Kết quả xổ số Thần Mèo</li>
+                    <li>🟡 Đang chờ trạm F12...</li>
+                    <li>⚡ Dữ liệu thật sẽ đi qua F12 → Server → Socket.io</li>
+                  </ul>
+                </div>
+                <div class="c2-info-box">
+                  <h3>Luật hiển thị</h3>
+                  <p>Giao diện chỉ hiển thị dữ liệu đã nhận. Không tự bịa số khi có data thật.</p>
+                </div>
+                <div class="c2-info-box">
+                  <h3>Chế độ khán giả tự làm cầu</h3>
+                  <p>Chạm chữ số thứ nhất để tạo điểm đầu. Chạm chữ số thứ hai để nối mũi tên. Có thể nối xuyên nhiều bảng/ngày.</p>
+                </div>
+                <div class="c2-info-box">
+                  <h3>Audit</h3>
+                  <p>Consensus đa nguồn · Audit 15s/30s.</p>
+                </div>
+              </div>
+              <div class="c2-log" data-c2-log-output>Nhật ký thao tác sẽ hiển thị tại đây.</div>
+              <div class="c2-link-panel">Kết nối logic: Không gian này phát sinh thao tác làm cầu; không gian Đặc biệt tuần nhận vị trí cầu từ hệ thống.</div>
+            </div>
+          </article>
+        </section>
+
+        <section class="c2-space" data-c2-space="db">
+          <article class="c2-space-card">
+            <div class="c2-space-card-header">
+              <div>
+                <h2>BẢNG ĐẶC BIỆT TUẦN | AUTO CẦU SPACE</h2>
+                <p>Không gian lõi tuần DB, nhận vị trí cầu từ hệ thống và phản hồi trạng thái tìm cầu.</p>
+              </div>
+              <span class="c2-badge">Weekly DB Core</span>
+            </div>
+            <div class="c2-space-body">
+              <div class="c2-action-row">
+                <button class="c2-action-button" type="button" data-c2-log="🔙 BẢNG SỐ">🔙 BẢNG SỐ</button>
+                <button class="c2-action-button" type="button" data-c2-log="LÀM CẦU CHUYỂN">LÀM CẦU CHUYỂN</button>
+                <button class="c2-action-button" type="button" data-c2-log="AI CẦU TÌM THẤY">AI CẦU TÌM THẤY</button>
+              </div>
+
+              <div class="c2-info-grid">
+                <div class="c2-info-box">
+                  <h3>Trạng thái hệ thống</h3>
+                  <p>HỆ THỐNG PHÂN TÍCH ĐÃ SẴN SÀNG...</p>
+                </div>
+                <div class="c2-info-box">
+                  <h3>Trạng thái nhận lệnh</h3>
+                  <p>CHỜ LỆNH TỪ BẢNG ĐẶC BIỆT TUẦN...</p>
+                </div>
+                <div class="c2-info-box">
+                  <h3>Vùng chức năng</h3>
+                  <p>📊 ĐẶC BIỆT TUẦN</p>
+                </div>
+                <div class="c2-info-box">
+                  <h3>Cầu chuyển</h3>
+                  <p>Sẵn sàng nhận vị trí cầu từ hệ thống.</p>
+                </div>
+              </div>
+              <div class="c2-log" data-c2-log-output>Nhật ký thao tác sẽ hiển thị tại đây.</div>
+              <div class="c2-link-panel">Kết nối logic: Không gian này không tự tạo nguồn dữ liệu; nó nhận tín hiệu/vị trí cầu từ không gian C2 F12 Live hoặc từ tầng server sau này.</div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const app = document.querySelector('[data-c2-app]');
+      if (!app) return;
+
+      const routeButtons = app.querySelectorAll('[data-c2-route]');
+      const spaces = app.querySelectorAll('[data-c2-space]');
+
+      function activateRoute(routeName) {
+        routeButtons.forEach(function (button) {
+          button.classList.toggle('is-active', button.getAttribute('data-c2-route') === routeName);
+        });
+
+        spaces.forEach(function (space) {
+          space.classList.toggle('is-active', space.getAttribute('data-c2-space') === routeName);
+        });
+      }
+
+      function writeLog(sourceButton) {
+        const activeSpace = app.querySelector('.c2-space.is-active');
+        if (!activeSpace) return;
+
+        const output = activeSpace.querySelector('[data-c2-log-output]');
+        if (!output) return;
+
+        const message = sourceButton.getAttribute('data-c2-log');
+        const now = new Date();
+        output.textContent = '[' + now.toLocaleString('vi-VN') + '] Đã kích hoạt: ' + message;
+      }
+
+      function clearLog(sourceButton) {
+        const activeSpace = app.querySelector('.c2-space.is-active');
+        if (!activeSpace) return;
+
+        const output = activeSpace.querySelector('[data-c2-log-output]');
+        if (!output) return;
+
+        output.textContent = 'Đã xóa cầu / làm sạch nhật ký thao tác trong không gian hiện tại.';
+      }
+
+      routeButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          activateRoute(button.getAttribute('data-c2-route'));
+        });
+      });
+
+      app.querySelectorAll('[data-c2-log]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          writeLog(button);
+        });
+      });
+
+      app.querySelectorAll('[data-c2-clear]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          clearLog(button);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
