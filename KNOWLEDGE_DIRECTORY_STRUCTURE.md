@@ -10,18 +10,16 @@ knowledge-base/
 │   ├── Evidence_Status_Convention.md
 │   └── Object_Schema.md
 ├── 01_INVENTORY/
-│   ├── Cognitive_Capability_Inventory.md
-│   └── Evidence_Status_Inventory.md
+│   └── Capability_Inventory.md
 ├── 02_KNOWLEDGE/
 │   ├── KS-001.md ... KS-009.md
 │   └── frameworks/
 │       └── Framework_*.md
-│   ├── packs/
-│   └── reusable-assets/
+│   └── README.md
 ├── 03_SOP/
-│   └── candidates/
+│   └── README.md
 ├── 04_PROMPT_LIBRARY/
-│   └── candidates/
+│   └── README.md
 ├── 05_KNOWLEDGE_GRAPH/
 │   └── MASTER_KNOWLEDGE_GRAPH_v1.md
 ├── 06_STRATEGY/
@@ -38,7 +36,7 @@ knowledge-base/
 |---|---|---|
 | `00_QUY_UOC` | Metadata definitions, FACT/INFERENCE/UNKNOWN and confidence conventions | `00_QUY_UOC/Evidence_Status_Convention.md`, `Object_Schema.md` |
 | `01_INVENTORY` | Claims about known knowledge objects/capabilities and evidence status | `01_INVENTORY/Capability_Inventory.md`, `KNOWLEDGE_OBJECT_INDEX.md` |
-| `02_KNOWLEDGE` | Canonical knowledge objects, framework records, packs, reusable assets | `02_KNOWLEDGE/KS-001.md`…`KS-009.md`, `frameworks/`, `KNOWLEDGE_PACKS.md`, `REUSABLE_ASSETS.md` |
+| `02_KNOWLEDGE` | Canonical knowledge objects and framework records; packs/assets remain root-level canonical references | `02_KNOWLEDGE/KS-001.md`…`KS-009.md`, `02_KNOWLEDGE/frameworks/`, `KNOWLEDGE_PACKS.md`, `REUSABLE_ASSETS.md` |
 | `03_SOP` | Candidate and later approved procedures | `03_SOP/README.md` links `SOP_CANDIDATES.md`; not approved |
 | `04_PROMPT_LIBRARY` | Candidate prompt templates | `04_PROMPT_LIBRARY/README.md` links `PROMPT_CANDIDATES.md`; not validated as defaults |
 | `05_KNOWLEDGE_GRAPH` | Nodes, typed relationships, graph versions | `05_KNOWLEDGE_GRAPH/MASTER_KNOWLEDGE_GRAPH_v1.md` |

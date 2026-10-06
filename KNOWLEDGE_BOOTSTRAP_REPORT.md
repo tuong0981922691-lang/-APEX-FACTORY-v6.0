@@ -2,13 +2,14 @@
 
 ## Status
 
-An initial, domain-neutral knowledge repository has been organized from the five authorized seed-generation files. This work did not investigate additional sources or attempt reverse engineering. The directory structure below is a proposed logical organization represented by indexes and cross-linked Markdown artifacts; this report does not claim that every directory contains imported records yet.
+An initial, domain-neutral knowledge repository has been organized from the five authorized seed-generation files. This work did not investigate additional sources or attempt reverse engineering. The taxonomy directories, nine seed object records, and nine individual framework records have been materialized as Markdown; this does not claim that a database or automated storage engine has been provisioned.
 
 ## FACT
 
 - Nine reusable knowledge seeds are documented with stable seed IDs, descriptions, evidence, related nodes, and confidence labels.
 - Eight topical packs group those seeds; the coordination pack explicitly does not assert that autonomous agents exist.
 - A conceptual master graph links knowledge nodes, frameworks, candidate procedures, prompts, and decision endpoints.
+- Nine individual framework records and nine canonical seed-object files are materialized under the knowledge category.
 - Candidate frameworks, procedures, and prompts remain distinguished from approved/implemented controls.
 - Research and action priorities are separated into NOW, NEXT, and LATER.
 - Domain-bound content is designated for exclusion or quarantine instead of being relabeled as universal without review.
@@ -32,12 +33,12 @@ An initial, domain-neutral knowledge repository has been organized from the five
 |---|---|
 | `KNOWLEDGE_DIRECTORY_STRUCTURE.md` | Logical mapping to the eight knowledge categories |
 | `KNOWLEDGE_OBJECT_INDEX.md` | Index of nine canonical seed objects |
-| `FRAMEWORK_INDEX.md` | Framework records and per-framework-file plan |
+| `FRAMEWORK_INDEX.md` | Framework records and links to nine individual framework files |
 | `RESEARCH_BACKLOG.md` | Unresolved evidence questions and domain coverage gaps |
 | `ACTION_BACKLOG.md` | NOW / NEXT / LATER curation actions |
 
 ## Acceptance state
 
-**FACT:** Artifacts are documentation and index structure; no executable knowledge platform was created.  
+**FACT:** Artifacts are documentation, taxonomy directories, object records, and indexes; no executable knowledge platform was created.  
 **INFERENCE:** The bootstrap is ready for human review and later import into a chosen knowledge system.  
 **UNKNOWN:** Whether a designated owner has accepted the taxonomy, frameworks, or candidate procedures.
