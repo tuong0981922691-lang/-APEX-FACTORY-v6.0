@@ -2,13 +2,13 @@
 
 ## Framework record convention
 
-Each framework is indexed as a separate logical record and maps to one proposed per-framework file. Framework status is preserved: directly documented framework, normalized candidate, or conceptual architecture. A separate file is a logical target; this index does not claim the target folders have been provisioned.
+Each framework has an individual record under `02_KNOWLEDGE/frameworks/`. Framework status is preserved: directly documented framework, normalized candidate, or conceptual architecture.
 
 ## Frameworks
 
 ### FW-01 — FACT / INFERENCE / UNKNOWN
 
-- **Proposed file:** `Framework_FACT_INFERENCE_UNKNOWN.md`
+- **File:** `02_KNOWLEDGE/frameworks/Framework_FACT_INFERENCE_UNKNOWN.md`
 - **Seed links:** KS-001
 - **Knowledge links:** K-001, K-011
 - **Evidence:** `FRAMEWORK_LIBRARY.md`, F-01
@@ -19,7 +19,7 @@ Each framework is indexed as a separate logical record and maps to one proposed 
 
 ### FW-02 — Human Approval Gate
 
-- **Proposed file:** `Framework_Human_Approval_Gate.md`
+- **File:** `02_KNOWLEDGE/frameworks/Framework_Human_Approval_Gate.md`
 - **Seed links:** KS-002, KS-007, KS-009
 - **Knowledge links:** K-002, K-006, K-008
 - **Evidence:** `FRAMEWORK_LIBRARY.md`, F-02
@@ -30,7 +30,7 @@ Each framework is indexed as a separate logical record and maps to one proposed 
 
 ### FW-03 — Evidence Before Trust
 
-- **Proposed file:** `Framework_Evidence_Before_Trust.md`
+- **File:** `02_KNOWLEDGE/frameworks/Framework_Evidence_Before_Trust.md`
 - **Seed links:** KS-003, KS-008
 - **Knowledge links:** K-004, K-005, K-007, K-011, K-012
 - **Evidence:** `FRAMEWORK_LIBRARY.md`, F-03
@@ -41,7 +41,7 @@ Each framework is indexed as a separate logical record and maps to one proposed 
 
 ### FW-04 — Audit First / Evidence Lineage
 
-- **Proposed file:** `Framework_Audit_First.md`
+- **File:** `02_KNOWLEDGE/frameworks/Framework_Audit_First.md`
 - **Seed links:** KS-004, KS-005
 - **Knowledge links:** K-009, K-010, K-014
 - **Evidence:** `FRAMEWORK_LIBRARY.md`, F-04
@@ -52,7 +52,7 @@ Each framework is indexed as a separate logical record and maps to one proposed 
 
 ### FW-05 — Failure Library / Risk–Incident Separation
 
-- **Proposed file:** `Framework_Failure_Learning.md`
+- **File:** `02_KNOWLEDGE/frameworks/Framework_Failure_Learning.md`
 - **Seed links:** KS-005, KS-008
 - **Knowledge links:** K-010, K-011, K-014
 - **Evidence:** `FRAMEWORK_LIBRARY.md`, F-05
@@ -63,7 +63,7 @@ Each framework is indexed as a separate logical record and maps to one proposed 
 
 ### FW-06 — Cognitive Pipeline / Capability Architecture
 
-- **Proposed file:** `Framework_Cognitive_Capability_Pipeline.md`
+- **File:** `02_KNOWLEDGE/frameworks/Framework_Cognitive_Capability_Pipeline.md`
 - **Seed links:** KS-006, KS-009
 - **Knowledge links:** K-003, K-015
 - **Evidence:** `FRAMEWORK_LIBRARY.md`, F-06
@@ -74,7 +74,7 @@ Each framework is indexed as a separate logical record and maps to one proposed 
 
 ### FW-07 — Reversible, Staged Change
 
-- **Proposed file:** `Framework_Reversible_Staged_Change.md`
+- **File:** `02_KNOWLEDGE/frameworks/Framework_Reversible_Staged_Change.md`
 - **Seed links:** KS-002, KS-007
 - **Knowledge links:** K-002, K-006, K-008, K-013
 - **Evidence:** `FRAMEWORK_LIBRARY.md`, F-07
@@ -85,7 +85,7 @@ Each framework is indexed as a separate logical record and maps to one proposed 
 
 ### FW-08 — Progressive Evidence Review
 
-- **Proposed file:** `Framework_Progressive_Evidence_Review.md`
+- **File:** `02_KNOWLEDGE/frameworks/Framework_Progressive_Evidence_Review.md`
 - **Seed links:** KS-008
 - **Knowledge links:** K-004, K-010, K-012, K-014
 - **Evidence:** `FRAMEWORK_LIBRARY.md`, F-08
@@ -96,7 +96,7 @@ Each framework is indexed as a separate logical record and maps to one proposed 
 
 ### FW-09 — Acceptance State Machine
 
-- **Proposed file:** `Framework_Acceptance_State_Machine.md`
+- **File:** `02_KNOWLEDGE/frameworks/Framework_Acceptance_State_Machine.md`
 - **Seed links:** KS-003, KS-009
 - **Knowledge links:** K-001, K-005, K-006, K-011
 - **Evidence:** `FRAMEWORK_LIBRARY.md`, F-09
@@ -109,6 +109,6 @@ Each framework is indexed as a separate logical record and maps to one proposed 
 
 **FACT:** The bootstrap request asks for one file per framework and gives examples; the framework library contains nine framework records.
 
-**INFERENCE:** The nine proposed filenames above are individual logical framework objects. They should be created in the future framework directory after review; the current output set intentionally contains only the six requested bootstrap outputs.
+**FACT:** Nine individual framework records have been materialized in the category structure.
 
 **UNKNOWN:** Whether a future directory convention or title standard supersedes these proposed filenames.

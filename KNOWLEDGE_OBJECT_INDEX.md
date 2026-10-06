@@ -16,6 +16,8 @@ Each initial object is based on a seed and has:
 
 ## Canonical knowledge objects
 
+Canonical individual files are stored under `02_KNOWLEDGE/`; the index below is for navigation and status, not a second copy of object records.
+
 ### KO-001 (seed KS-001) — Keep fact, inference, and unknown distinct
 
 - **ID:** KO-001 / KS-001
@@ -138,3 +140,17 @@ Each initial object is based on a seed and has:
 **FACT:** Nine seed records are available in the authorized input.  
 **INFERENCE:** KO-001…KO-009 provide knowledge-object aliases while retaining original KS IDs to preserve lineage.  
 **UNKNOWN:** Whether the receiving system prefers a single ID namespace or separate object IDs.
+
+## Canonical file map
+
+| Object | File |
+|---|---|
+| KO-001 / KS-001 | `02_KNOWLEDGE/KS-001.md` |
+| KO-002 / KS-002 | `02_KNOWLEDGE/KS-002.md` |
+| KO-003 / KS-003 | `02_KNOWLEDGE/KS-003.md` |
+| KO-004 / KS-004 | `02_KNOWLEDGE/KS-004.md` |
+| KO-005 / KS-005 | `02_KNOWLEDGE/KS-005.md` |
+| KO-006 / KS-006 | `02_KNOWLEDGE/KS-006.md` |
+| KO-007 / KS-007 | `02_KNOWLEDGE/KS-007.md` |
+| KO-008 / KS-008 | `02_KNOWLEDGE/KS-008.md` |
+| KO-009 / KS-009 | `02_KNOWLEDGE/KS-009.md` |
